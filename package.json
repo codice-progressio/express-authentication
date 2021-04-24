@@ -4,18 +4,31 @@
   "description": "Libreria de autenticacion y utilidades.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No test specified\" && exit 0",
+    "start-local": "nodemon app.js",
+    "start": "nodej app.js"
   },
   "keywords": [
     "seguridad",
     "autenticacion",
-    "express",
-    "mongodb"
+    "express"
   ],
   "author": "Rafael Ramirez",
   "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.7"
+  },
   "dependencies": {
+    "colors": "^1.4.0",
     "cors": "^2.8.5",
     "express": "^4.17.1"
+  },
+  "publishConfig": {
+    "public": true
+  },
+  "engines": {
+    "node": "14.x.x",
+    "npm": "6.x.x"
   }
 }
