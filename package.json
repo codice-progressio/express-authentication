@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"No test specified\" && exit 0",
     "start-local": "nodemon app.js",
-    "start": "nodej app.js"
+    "start": "node app.js"
   },
   "keywords": [
     "seguridad",
