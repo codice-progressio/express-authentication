@@ -10,6 +10,8 @@ codice_security.configuraciones.cors.origin = process.env.ORIGIN
 
 app.use(codice_security.basico())
 
+app.use(express.json({ limit: "5MB" }))
+
 app.get("/", (req, res) => {
   res.send("Hello World!")
 })
