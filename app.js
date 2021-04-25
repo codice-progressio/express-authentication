@@ -24,15 +24,21 @@ app.get("/", (req, res) => {
   res.send("Hello World!")
 })
 
-app.post("/token", (req, res, next) => {
-  //Firmamos un token
+app.post("/login", (req, res, next) => {
+  const password = "password" === req.body?.password
+  const usuario = "usuario" === req.body?.usuario
 
-  codice_security.token
-    .generar({ mi: "objeto" })
-    .then(token => {
-      res.send({ token })
-    })
-    .catch(err => next(err))
+  if (password && usuario) {
+    //Firmamos un token
+    return codice_security.token
+      .generar(req.body)
+      .then(token => {
+        res.send({ token })
+      })
+      .catch(err => next(err))
+  }
+
+  next(new Error("Credenciales incorrectas"))
 })
 
 app.use((err, req, res, next) => {
