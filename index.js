@@ -1,30 +1,8 @@
 const app = require("express")()
 const cors = require("cors")
-const colores = require("colors")
-
-const configuraciones = {
-  cors: {
-    origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  },
-
-  debug: false,
-}
-
-/**
- *Arreglo de mensajes
- *
- * @param {*} mensajes
- */
-function log(mensajes) {
-  if (configuraciones.debug)
-    console.log(
-      colores.cyan("[ codice-security ]"),
-      ...mensajes.map(x => colores.green(x))
-    )
-}
+const configuraciones = require("./configuraciones")
+const log = require("./utilidades").log
+const jwt = require("jsonwebtoken")
 
 /**
  *
@@ -35,9 +13,26 @@ function log(mensajes) {
 module.exports.basico = function (conf = configuraciones) {
   let c = conf?.cors ?? {}
 
-  log(["Seguridad establecida: ", c])
+  log("Seguridad establecida: ", c)
   app.use(cors(c))
   return app
+}
+
+module.exports.token = {
+  generar: objeto => {
+    return new Promise((resolve, reject) => {
+      configuraciones.validaciones.jwt()
+      jwt.sign(
+        objeto,
+        configuraciones.jwt.private_key,
+        { expiresIn: configuraciones.jwt.expiresIn },
+        function (err, token) {
+          if (err) return reject(err)
+          resolve(token)
+        }
+      )
+    })
+  },
 }
 
 module.exports.configuraciones = configuraciones

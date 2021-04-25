@@ -11,6 +11,9 @@ codice_security.configuraciones.debug = true
 // siempre la podemos sobreescribir. (TODO: Completar todas las opciones)
 codice_security.configuraciones.cors.origin = process.env.ORIGIN
 
+//TOKEN
+codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
+
 //Llamamos la configuracion de configuracion
 app.use(codice_security.basico())
 
@@ -19,6 +22,22 @@ app.use(express.json({ limit: "5MB" }))
 
 app.get("/", (req, res) => {
   res.send("Hello World!")
+})
+
+app.post("/token", (req, res, next) => {
+  //Firmamos un token
+
+  codice_security.token
+    .generar({ mi: "objeto" })
+    .then(token => {
+      res.send({ token })
+    })
+    .catch(err => next(err))
+})
+
+app.use((err, req, res, next) => {
+  console.log(err)
+  res.status(500).send({ err })
 })
 
 app.listen(port, () => {
