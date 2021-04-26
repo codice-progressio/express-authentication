@@ -2,6 +2,9 @@ require("dotenv").config()
 const express = require("express")
 const app = express()
 const port = process.env.PORT ?? 3000
+const log = require("./utilidades").log
+
+//SEGURIDAD --------------------------------------
 
 //Llamamos la libreria.
 const codice_security = require("./index.js")
@@ -10,12 +13,12 @@ codice_security.configuraciones.debug = true
 // Usamos la configuracion por defecto de cors, pero
 // siempre la podemos sobreescribir. (TODO: Completar todas las opciones)
 codice_security.configuraciones.cors.origin = process.env.ORIGIN
-
 //TOKEN
 codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
-
 //Llamamos la configuracion de configuracion
 app.use(codice_security.basico())
+
+//SEGURIDAD FIN ----------------------------------
 
 //Disfrutamos de la vida...
 app.use(express.json({ limit: "5MB" }))
@@ -38,14 +41,26 @@ app.post("/login", (req, res, next) => {
       .catch(err => next(err))
   }
 
-  next(new Error("Credenciales incorrectas"))
+  res.send({ error: "Credenciales incorrectas" })
 })
 
 app.use((err, req, res, next) => {
-  console.log(err)
+  log(err)
+  // SEGURIDAD - captura de errores
+  let errorJWT = codice_security.configuraciones.validaciones.errores.jwt(
+    err,
+    res
+  )
+
+  if (errorJWT) {
+    res.status(errorJWT.status).send(errorJWT.send)
+    return
+  }
+  // SEGURIDAD - captura de errores - fin
+
   res.status(500).send({ err })
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`Ejemplo de app. Escuchando en el puerto ${port}`)
 })

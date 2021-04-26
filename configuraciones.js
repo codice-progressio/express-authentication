@@ -11,11 +11,28 @@ const configuraciones = {
     private_key: undefined,
     //Expresado en segundos
     expiresIn: 3600,
+    decode: {
+      unless: ["/login"],
+      /*
+      Es posible que desee utilizar este módulo para identificar a los usuarios 
+      registrados y, al mismo tiempo, brindar acceso a los usuarios no 
+      registrados.Puede hacer esto usando la opción credentialsRequired:
+      */
+      credentialsRequired: true,
+      requestProperty: "usuario",
+    },
   },
 
   validaciones: {
     jwt: validarJwt,
+    errores: { jwt: validaciones },
   },
+}
+
+function validaciones(err, res) {
+  if (err.name === "UnauthorizedError")
+    return { status: 401, send: { error: "No autorizado" } }
+  return null
 }
 
 function validarJwt() {
@@ -33,6 +50,3 @@ function validarJwt() {
 }
 
 module.exports = configuraciones
-
-
-
