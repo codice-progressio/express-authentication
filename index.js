@@ -4,6 +4,7 @@ const configuraciones = require("./configuraciones")
 const log = require("./utilidades").log
 const jsonwebtoken = require("jsonwebtoken")
 const express_jwt = require("express-jwt")
+const usuarioModel = require("./models/usuario.model")
 
 /**
  *
@@ -17,7 +18,6 @@ module.exports.basico = function () {
 
   log("Decodificacion de token", configuraciones.jwt.decode)
   configuraciones.validaciones.jwt()
-  
   app.use(
     express_jwt({
       secret: configuraciones.jwt.private_key,
@@ -27,6 +27,9 @@ module.exports.basico = function () {
       path: configuraciones.jwt.decode.unless,
     })
   )
+
+  log("Cargando rutas de usuario")
+  app.use("/usuario", require("./routes/usuario.routes"))
 
   return app
 }
@@ -49,3 +52,4 @@ module.exports.token = {
 }
 
 module.exports.configuraciones = configuraciones
+module.exports.usuarioModel = usuarioModel

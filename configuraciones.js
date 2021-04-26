@@ -1,4 +1,39 @@
 const colores = require("colors")
+
+const callbacks = [
+  {
+    metodo: "get",
+    path: "/",
+    cb: async (req, res, next) => {
+      // Obtener y filtrar todos los usuarios
+      const busqueda = {}
+      const limit = (req.params.limit ?? 10) * 1
+      const skip = (req.params.skip ?? 0) * 1
+
+      const termino = req.params?.termino
+      if (termino) {
+        // Si hay un termino se lo aplicamos a los campos necesarios
+        buqueda["$or"] = ["nombre", "email"].map(x => {
+          return { [x]: { $regex: termino, $options: "i" } }
+        })
+      }
+
+      let Usuario = require("./models/usuario.model")
+      try {
+        let usuarios = await Usuario.find(busqueda)
+          .limit(limit)
+          .skip(skip)
+          .exec()
+        let total = await Usuario.find(busqueda).countDocuments()
+
+        return res.send({ usuarios, total })
+      } catch (error) {
+        next(error)
+      }
+    },
+  },
+]
+
 const configuraciones = {
   cors: {
     origin: "*",
@@ -26,6 +61,31 @@ const configuraciones = {
   validaciones: {
     jwt: validarJwt,
     errores: { jwt: validaciones },
+  },
+  usuario: {
+    nombre_bd: "Usuario",
+    schema: {
+      nombre: { type: String, min: 4 },
+      email: {
+        type: String,
+        unique: true,
+        required: [true, "El correo es necesario."],
+      },
+      password: {
+        type: String,
+        required: [true, "La contraseña es necesaria."],
+        select: false,
+        min: 8,
+      },
+      permissions: {
+        type: [String],
+        default: ["login"],
+        select: false,
+      },
+      eliminado: { type: Boolean, default: false },
+    },
+
+    callbacks,
   },
 }
 
