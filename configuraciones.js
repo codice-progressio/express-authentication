@@ -1,39 +1,5 @@
 const colores = require("colors")
 
-const callbacks = [
-  {
-    metodo: "get",
-    path: "/",
-    cb: async (req, res, next) => {
-      // Obtener y filtrar todos los usuarios
-      const busqueda = {}
-      const limit = (req.params.limit ?? 10) * 1
-      const skip = (req.params.skip ?? 0) * 1
-
-      const termino = req.params?.termino
-      if (termino) {
-        // Si hay un termino se lo aplicamos a los campos necesarios
-        buqueda["$or"] = ["nombre", "email"].map(x => {
-          return { [x]: { $regex: termino, $options: "i" } }
-        })
-      }
-
-      let Usuario = require("./models/usuario.model")
-      try {
-        let usuarios = await Usuario.find(busqueda)
-          .limit(limit)
-          .skip(skip)
-          .exec()
-        let total = await Usuario.find(busqueda).countDocuments()
-
-        return res.send({ usuarios, total })
-      } catch (error) {
-        next(error)
-      }
-    },
-  },
-]
-
 const configuraciones = {
   cors: {
     origin: "*",
@@ -47,7 +13,7 @@ const configuraciones = {
     //Expresado en segundos
     expiresIn: 3600,
     decode: {
-      unless: ["/login"],
+      unless: ["/usuario/login", "/usuario/crear-usuario-administrador"],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
       registrados y, al mismo tiempo, brindar acceso a los usuarios no 
@@ -84,8 +50,6 @@ const configuraciones = {
       },
       eliminado: { type: Boolean, default: false },
     },
-
-    callbacks,
   },
 }
 

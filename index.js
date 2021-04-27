@@ -22,6 +22,7 @@ module.exports.basico = function () {
     express_jwt({
       secret: configuraciones.jwt.private_key,
       credentilsRequired: configuraciones.jwt.decode.credentialsRequired,
+      requestProperty: configuraciones.jwt.decode.requestProperty,
       algorithms: ["HS256"],
     }).unless({
       path: configuraciones.jwt.decode.unless,
@@ -47,6 +48,20 @@ module.exports.token = {
           resolve(token)
         }
       )
+    })
+  },
+}
+
+module.exports.hash = {
+  crypt: password => {
+    return new Promise((resolve, reject) => {
+      const bcrypt = require("bcrypt")
+      const saltRounds = 10
+
+      bcrypt.hash(password, saltRounds, function (err, hash) {
+        if (err) return reject(err)
+        resolve(hash)
+      })
     })
   },
 }

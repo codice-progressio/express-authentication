@@ -1,4 +1,5 @@
 require("dotenv").config()
+
 const express = require("express")
 const app = express()
 const port = process.env.PORT ?? 3000
@@ -15,6 +16,9 @@ const db = mongoose.connection
 db.on("error", console.error.bind(console, "connection error:"))
 db.once("open", () => {
   console.log("BD en linea")
+
+  app.use(express.json({ limit: "5MB" }))
+  //Esta configurcion es para poder hacer pruebas de creación.
 
   //SEGURIDAD --------------------------------------
 
@@ -33,28 +37,12 @@ db.once("open", () => {
   //SEGURIDAD FIN ----------------------------------
 
   //Disfrutamos de la vida...
-  app.use(express.json({ limit: "5MB" }))
 
   app.get("/", (req, res) => {
     res.send("Hello World!")
   })
 
-  app.post("/login", (req, res, next) => {
-    const password = "password" === req.body?.password
-    const usuario = "usuario" === req.body?.usuario
 
-    if (password && usuario) {
-      //Firmamos un token
-      return codice_security.token
-        .generar(req.body)
-        .then(token => {
-          res.send({ token })
-        })
-        .catch(err => next(err))
-    }
-
-    res.send({ error: "Credenciales incorrectas" })
-  })
 
   app.use((err, req, res, next) => {
     log(err)

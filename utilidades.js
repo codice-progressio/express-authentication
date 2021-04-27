@@ -12,3 +12,18 @@ module.exports.log = function (...mensajes) {
       ...mensajes.map(x => colores.green(x))
     )
 }
+
+const emoticones = [
+  "┬──┬ ¯_(ツ) (╯°□°）╯︵ ┻━┻ ",
+  "┻━┻︵ヽ(`Д´)ﾉ︵ ┻━┻",
+  "┬─┬ノ( º _ ºノ) (ノಠ益ಠ)ノ彡┻━┻",
+]
+
+module.exports.emoticones = {
+  lista: emoticones,
+  random: () => {
+    let numeroRandom = (Math.random() * emoticones.length).toFixed(0)
+    let emoticon = emoticones[numeroRandom]
+    return emoticon
+  },
+}
