@@ -23,20 +23,33 @@ module.exports = {
     path: "/login",
     permiso: "",
     cb: (req, res, next) => {
-      const password = "password" === req.body?.password
-      const usuario = "usuario" === req.body?.usuario
+      const password = req.body?.password
+      const email = req.body?.email
+      const credencialesError = "Credenciales incorrectas"
 
-      if (password && usuario) {
-        //Firmamos un token
-        return codice_security.token
-          .generar(req.body)
-          .then(token => {
-            res.send({ token })
-          })
-          .catch(err => next(err))
-      }
-
-      res.send({ error: "Credenciales incorrectas" })
+      let usuarioBD = null
+      // El usuario debe existir.
+      const Usuario = require("./models/usuario.model")
+      Usuario.findOne({ email })
+        .select("+password +permissions")
+        .lean()
+        .exec()
+        .then(usuario => {
+          if (!usuario) throw credencialesError
+          usuarioBD = usuario
+          // Comprobamos el password
+          return codice_security.hash.compare(password, usuario.password)
+        })
+        .then(passwordCorrecto => {
+          if (!passwordCorrecto) throw credencialesError
+          delete usuarioBD.password
+          //Firmamos un token
+          return codice_security.token.generar(usuarioBD)
+        })
+        .then(token => {
+          res.send({ token })
+        })
+        .catch(err => next(err))
     },
   },
 
@@ -79,6 +92,7 @@ module.exports = {
     path: "/id/:id",
     permiso: "login",
     cb: (req, res, next) => {
+      console.log(req.usuario)
       // Un usuario diferente no puede leer los datos de otro usuario
       let paso = comprobarAdministradorMismoUsuario(req, res, next)
 
@@ -118,9 +132,10 @@ module.exports = {
         .catch(_ => next(_))
     },
   },
+
   create_administrador: {
     metodo: "post",
-    path: "/crear-usuario-administrador",
+    path: "/crear-administrador",
     // No requiere permiso
     permiso: "",
     cb: async (req, res, next) => {
@@ -128,7 +143,7 @@ module.exports = {
 
       let administrador = Usuario.find({
         permissions: "administrador",
-      }).countDocumements()
+      }).countDocuments()
 
       if (administrador > 0) throw next("Ya existe el administrador")
 

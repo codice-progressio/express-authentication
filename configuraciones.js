@@ -13,7 +13,7 @@ const configuraciones = {
     //Expresado en segundos
     expiresIn: 3600,
     decode: {
-      unless: ["/usuario/login", "/usuario/crear-usuario-administrador"],
+      unless: ["/usuario/login", "/usuario/crear-administrador"],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
       registrados y, al mismo tiempo, brindar acceso a los usuarios no 

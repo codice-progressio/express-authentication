@@ -53,17 +53,8 @@ module.exports.token = {
 }
 
 module.exports.hash = {
-  crypt: password => {
-    return new Promise((resolve, reject) => {
-      const bcrypt = require("bcrypt")
-      const saltRounds = 10
-
-      bcrypt.hash(password, saltRounds, function (err, hash) {
-        if (err) return reject(err)
-        resolve(hash)
-      })
-    })
-  },
+  crypt: password => require("bcrypt").hash(password, 10),
+  compare: (password, hash) => require("bcrypt").compare(password, hash),
 }
 
 module.exports.configuraciones = configuraciones
