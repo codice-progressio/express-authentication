@@ -18,6 +18,38 @@ function comprobarAdministradorMismoUsuario(req, res, next) {
 }
 
 module.exports = {
+  create_administrador: {
+    metodo: "post",
+    path: "/crear-administrador",
+    // No requiere permiso
+    permiso: "",
+    cb: async (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+
+      let administrador = Usuario.find({
+        permissions: "administrador",
+      }).countDocuments()
+
+      if (administrador > 0) throw next("Ya existe el administrador")
+
+      let codice_security = require("./index")
+
+      if (!req.body?.password) throw next("No definiste el password")
+      codice_security.hash
+        .crypt(req.body.password)
+        .then(async password => {
+          let usuario = new Usuario(req.body)
+          usuario.password = password
+          usuario.permissions.push("administrador")
+          return usuario.save()
+        })
+        .then(usuario => {
+          usuario.password = require("./utilidades").emoticones.random()
+          res.send({ usuario })
+        })
+        .catch(_ => next(_))
+    },
+  },
   login: {
     metodo: "post",
     path: "/login",
@@ -123,39 +155,6 @@ module.exports = {
         .then(async password => {
           let usuario = new Usuario(req.body)
           usuario.password = password
-          return usuario.save()
-        })
-        .then(usuario => {
-          usuario.password = require("./utilidades").emoticones.random()
-          res.send({ usuario })
-        })
-        .catch(_ => next(_))
-    },
-  },
-
-  create_administrador: {
-    metodo: "post",
-    path: "/crear-administrador",
-    // No requiere permiso
-    permiso: "",
-    cb: async (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
-
-      let administrador = Usuario.find({
-        permissions: "administrador",
-      }).countDocuments()
-
-      if (administrador > 0) throw next("Ya existe el administrador")
-
-      let codice_security = require("./index")
-
-      if (!req.body?.password) throw next("No definiste el password")
-      codice_security.hash
-        .crypt(req.body.password)
-        .then(async password => {
-          let usuario = new Usuario(req.body)
-          usuario.password = password
-          usuario.permissions.push("administrador")
           return usuario.save()
         })
         .then(usuario => {
