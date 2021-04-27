@@ -26,11 +26,10 @@ module.exports = {
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
 
-      let administrador = Usuario.find({
+      let administrador = await Usuario.find({
         permissions: "administrador",
       }).countDocuments()
-
-      if (administrador > 0) throw next("Ya existe el administrador")
+      if (administrador > 0) return next("Ya existe el administrador")
 
       let codice_security = require("./index")
 
