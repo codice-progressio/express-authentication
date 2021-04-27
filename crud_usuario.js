@@ -210,13 +210,13 @@ module.exports = {
       let usuario = await Usuario.findById(id).select("password").exec()
       if (!usuario) throw next("No existe el id")
 
-      require("./index")
-        .utilidades.hash.crypt(password)
+      codice_security.hash
+        .crypt(password)
         .then(pass => {
           usuario.password = pass
           return usuario.save()
         })
-        .then(usuario => res.send())
+        .then(() => res.send())
         .catch(_ => next(_))
     },
   },
