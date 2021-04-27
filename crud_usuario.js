@@ -123,7 +123,6 @@ module.exports = {
     path: "/id/:id",
     permiso: "login",
     cb: (req, res, next) => {
-      console.log(req.usuario)
       // Un usuario diferente no puede leer los datos de otro usuario
       let paso = comprobarAdministradorMismoUsuario(req, res, next)
 
