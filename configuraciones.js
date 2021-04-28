@@ -49,7 +49,31 @@ const configuraciones = {
         select: false,
       },
       eliminado: { type: Boolean, default: false },
+      email_validado: {
+        type: {
+          codigo: String,
+          validado: { type: Boolean, default: false },
+          intentos: { type: Number, default: 0 },
+        },
+        select: false,
+      },
     },
+  },
+
+  correo: {
+    transport: {
+      host: undefined,
+      port: undefined,
+      auth: {
+        user: "",
+        pass: "",
+      },
+    },
+    mailOptions: {
+      from: undefined,
+    },
+    dominio: undefined,
+    nombre_aplicacion: undefined,
   },
 }
 

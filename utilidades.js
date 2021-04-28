@@ -27,3 +27,16 @@ module.exports.emoticones = {
     return emoticon
   },
 }
+
+module.exports.correo = (
+  mailOptions = {
+    from: "",
+    to: "",
+    subject: "",
+    html: "",
+  }
+) => {
+  const nodemailer = require("nodemailer")
+  var transport = nodemailer.createTransport(configuraciones.correo.transport)
+  return transport.sendMail(mailOptions)
+}

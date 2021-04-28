@@ -31,6 +31,24 @@ db.once("open", () => {
   codice_security.configuraciones.cors.origin = process.env.ORIGIN
   //TOKEN
   codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
+
+  //  CORREO
+
+  codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
+  codice_security.configuraciones.correo.nombre_aplicacion =
+    process.env.CORREO_NOMBRE_APLICACION
+  codice_security.configuraciones.correo.transport.host =
+    process.env.CORREO_TRANSPORT_HOST
+  codice_security.configuraciones.correo.transport.port =
+    process.env.CORREO_TRANSPORT_PORT
+  codice_security.configuraciones.correo.transport.auth.user =
+    process.env.CORREO_TRANSPORT_AUTH_USER
+  codice_security.configuraciones.correo.transport.auth.pass =
+    process.env.CORREO_TRANSPORT_AUTH_PASS
+
+  codice_security.configuraciones.correo.mailOptions.from =
+    process.env.CORREO_MAILOPTIONS_FROM
+
   //Llamamos la configuracion de configuracion
   app.use(codice_security.basico())
 
@@ -41,8 +59,6 @@ db.once("open", () => {
   app.get("/", (req, res) => {
     res.send("Hello World!")
   })
-
-
 
   app.use((err, req, res, next) => {
     log(err)

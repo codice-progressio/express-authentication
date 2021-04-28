@@ -1,5 +1,3 @@
-const codice_security = require("./index")
-
 function comprobarAdministradorMismoUsuario(req, res, next) {
   //Solo el mismo usuario se puede modificar estos datos
   // o si es administrador puede cambiar el de cualquiera
@@ -16,6 +14,29 @@ function comprobarAdministradorMismoUsuario(req, res, next) {
 
   return true
 }
+
+function enviarCorreoConfirmacionUsuario(us) {
+  const configuraciones = require("./configuraciones")
+  let html = require("./plantillas.email").correo_confirmacion({
+    correo: us.email,
+    link_confirmacion: configuraciones.correo.dominio + "/usuario/confirmar",
+    codigo: us.email_validado.codigo + us._id,
+    nombre: us.nombre,
+    nombre_aplicacion: configuraciones.correo.nombre_aplicacion,
+  })
+
+  var mailOptions = {
+    from: configuraciones.correo.mailOptions.from,
+    to: us.email,
+    subject: "IMPERIUMsic - Se ha creado un usuario con tu correo",
+    html,
+  }
+  const utilidades = require("./utilidades")
+  return utilidades.correo(mailOptions)
+}
+
+const generarCodigoDeActivacion = () =>
+  Math.floor(100000 + Math.random() * 900000)
 
 module.exports = {
   create_administrador: {
@@ -34,17 +55,24 @@ module.exports = {
       let codice_security = require("./index")
 
       if (!req.body?.password) throw next("No definiste el password")
+      let us = null
       codice_security.hash
         .crypt(req.body.password)
         .then(async password => {
           let usuario = new Usuario(req.body)
           usuario.password = password
           usuario.permissions.push("administrador")
+          usuario.email_validado.codigo = generarCodigoDeActivacion()
           return usuario.save()
         })
         .then(usuario => {
-          usuario.password = require("./utilidades").emoticones.random()
-          res.send({ usuario })
+          const utilidades = require("./utilidades")
+          us = usuario
+          us.password = utilidades.emoticones.random()
+          return enviarCorreoConfirmacionUsuario(us)
+        })
+        .then(mail => {
+          res.send({ usuario: us })
         })
         .catch(_ => next(_))
     },
@@ -57,6 +85,7 @@ module.exports = {
       const password = req.body?.password
       const email = req.body?.email
       const credencialesError = "Credenciales incorrectas"
+      const codice_security = require("./index")
 
       let usuarioBD = null
       // El usuario debe existir.
@@ -139,12 +168,12 @@ module.exports = {
 
   create: {
     metodo: "post",
-    path: "/administrador",
+    path: "/",
     permiso: "administrador",
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
       let codice_security = require("./index")
-
+      let us = null
       // Si es el primer usuario, entonces lo hacemos administrador.
 
       if (!req.body?.password) throw next("No definiste el password")
@@ -153,11 +182,16 @@ module.exports = {
         .then(async password => {
           let usuario = new Usuario(req.body)
           usuario.password = password
+          usuario["email_validado"] = { codigo: generarCodigoDeActivacion() }
           return usuario.save()
         })
         .then(usuario => {
           usuario.password = require("./utilidades").emoticones.random()
-          res.send({ usuario })
+          us = usuario
+          return enviarCorreoConfirmacionUsuario(us)
+        })
+        .then(email => {
+          res.send({ usuario: us })
         })
         .catch(_ => next(_))
     },
