@@ -1,3 +1,5 @@
+const msjError_codigo_no_valido = "El código no es valido"
+
 function comprobarAdministradorMismoUsuario(req, res, next) {
   //Solo el mismo usuario se puede modificar estos datos
   // o si es administrador puede cambiar el de cualquiera
@@ -28,15 +30,120 @@ function enviarCorreoConfirmacionUsuario(us) {
   var mailOptions = {
     from: configuraciones.correo.mailOptions.from,
     to: us.email,
-    subject: "IMPERIUMsic - Se ha creado un usuario con tu correo",
+    subject:
+      configuraciones.correo.mailOptions.from +
+      " - Se ha creado un usuario con tu correo",
     html,
   }
   const utilidades = require("./utilidades")
   return utilidades.correo(mailOptions)
 }
 
-const generarCodigoDeActivacion = () =>
-  Math.floor(100000 + Math.random() * 900000)
+const generarCodigoDeActivacion = () => {
+  return Math.floor(100000 + Math.random() * 900000)
+}
+
+async function comprobarIntentos(
+  opciones = {
+    codigo: undefined,
+    esLogin: true,
+    esValidacion: false,
+    usuario: undefined,
+  }
+) {
+  //Ningun usuario bloqueado se comprueba
+
+  return new Promise(async (resolve, reject) => {
+    const Usuario = require("./models/usuario.model")
+    async function reiniciarContadores() {
+      try {
+        // Reiniciamos los contadores.
+        await Usuario.updateOne(
+          { _id: opciones.usuario._id },
+          {
+            "email_validado.intentos": 0,
+            "email_validado.bloqueado": false,
+            "email_validado.intento_hora": null,
+          }
+        ).exec()
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    try {
+      //Si el usuario esta bloqueado, debe de tener una hora a la que se bloqueo.
+      if (opciones.usuario.email_validado.bloqueado) {
+        // Para desbloquearlo deben pasar los mínutos definidos.
+        const { DateTime } = require("luxon")
+        let minutosFaltantes = DateTime.fromISO(
+          new Date(opciones.usuario.email_validado.intento_hora).toISOString()
+        )
+          .plus({ minutes: 5 })
+          .diffNow(["minutes", "seconds"])
+
+        console.log({
+          hora: opciones.usuario.email_validado.intento_hora,
+          minutosFaltantes: minutosFaltantes.values,
+          pasa: minutosFaltantes <= 0,
+        })
+
+        // Si los minutos son 0 ó negativos desbloqueamos para el siguiente intento
+        if (minutosFaltantes <= 0) {
+          await reiniciarContadores()
+          // Modificamos minutos faltantes para que muestre solo 0 en caso de que
+          // sea mayor, esto con fines de estilo.
+          minutosFaltantes = 0
+        }
+
+        throw `Demasiados intentos. Vuelve a intentar en ${minutosFaltantes.minutes
+          .toString()
+          .padStart(2, "0")}:${minutosFaltantes.seconds
+          .toFixed(0)
+          .toString()
+          .padStart(2, "0")} minutos`
+      }
+
+      console.log()
+
+      if (opciones.esValidacion) {
+        // El codigo de verificacion debe ser igual
+        //Si el contador va arriba de 2 BLOQUEAMOS
+        if (opciones.usuario.email_validado.intentos > 1) {
+          await Usuario.updateOne(
+            { _id: opciones.usuario._id },
+            {
+              "email_validado.bloqueado": true,
+              "email_validado.intento_hora": new Date(),
+            }
+          ).exec()
+        }
+
+        console.log({ lasOpciones: opciones })
+        if (opciones.usuario.email_validado.codigo != opciones.codigo) {
+          //Si el contador no va arriba sumamos +1 intentos
+          await Usuario.updateOne(
+            { _id: opciones.usuario._id },
+            { $inc: { "email_validado.intentos": 1 } }
+          ).exec()
+          console.log(opciones)
+          throw msjError_codigo_no_valido
+        }
+      }
+
+      if (opciones.esLogin) {
+        throw "No se a definido"
+      }
+
+      //Si todo fue bien, pues devolvemos todas las opciones
+      // y de paso reiniciamos todos los valores de intentos.
+      await reiniciarContadores()
+      resolve(opciones)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
 module.exports = {
   create_administrador: {
@@ -62,7 +169,7 @@ module.exports = {
           let usuario = new Usuario(req.body)
           usuario.password = password
           usuario.permissions.push("administrador")
-          usuario.email_validado.codigo = generarCodigoDeActivacion()
+          usuario["email_validado"] = { codigo: generarCodigoDeActivacion() }
           return usuario.save()
         })
         .then(usuario => {
@@ -161,6 +268,51 @@ module.exports = {
       let Usuario = require("./models/usuario.model")
       Usuario.findById(req.params.id)
         .exec()
+        .then(usuario => res.send({ usuario }))
+        .catch(_ => next(_))
+    },
+  },
+
+  read_confirmar: {
+    metodo: "get",
+    path: "/confirmar",
+    permiso: "",
+    cb: (req, res, next) => {
+      // Debemos resibir un query
+      const codigoCompleto = req.query?.codigo
+      if (!codigoCompleto) throw next("Codigo no valido")
+
+      // El código es de 6 digitos.
+      const codigo = codigoCompleto.slice(0, 6)
+      // Y despues debe incluir el id del usuario.
+      const _id = codigoCompleto.slice(6)
+
+      const Usuario = require("./models/usuario.model")
+      // Comprobamos que el usuario este esperando un codigo de
+      // de confirmacion.
+
+      console.log({ codigo, _id })
+      Usuario.findById(_id)
+        // Cargamos la propiedad en el modelo.
+        .select("+email_validado")
+        .exec()
+        .then(async usuario => {
+          if (!usuario) throw msjError_codigo_no_valido
+
+          return comprobarIntentos({
+            usuario,
+            codigo,
+            esValidacion: true,
+          })
+        })
+        .then(opciones => {
+          // La comprobacion salio correcta, por lo tanto hacemos lo que tenemos
+          // que hacer.
+          let usuario = opciones.usuario
+          usuario.email_validado.validado = true
+          usuario.email_validado.codigo = null
+          return usuario.save()
+        })
         .then(usuario => res.send({ usuario }))
         .catch(_ => next(_))
     },

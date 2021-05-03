@@ -13,7 +13,11 @@ const configuraciones = {
     //Expresado en segundos
     expiresIn: 3600,
     decode: {
-      unless: ["/usuario/login", "/usuario/crear-administrador"],
+      unless: [
+        "/usuario/login",
+        "/usuario/crear-administrador",
+        "/usuario/confirmar",
+      ],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
       registrados y, al mismo tiempo, brindar acceso a los usuarios no 
@@ -54,6 +58,8 @@ const configuraciones = {
           codigo: String,
           validado: { type: Boolean, default: false },
           intentos: { type: Number, default: 0 },
+          intento_hora: Date,
+          bloqueado: { default: false, type: Boolean },
         },
         select: false,
       },
