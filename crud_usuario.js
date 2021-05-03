@@ -82,12 +82,6 @@ async function comprobarIntentos(
           .plus({ minutes: 5 })
           .diffNow(["minutes", "seconds"])
 
-        console.log({
-          hora: opciones.usuario.email_validado.intento_hora,
-          minutosFaltantes: minutosFaltantes.values,
-          pasa: minutosFaltantes <= 0,
-        })
-
         // Si los minutos son 0 ó negativos desbloqueamos para el siguiente intento
         if (minutosFaltantes <= 0) {
           await reiniciarContadores()
@@ -104,8 +98,6 @@ async function comprobarIntentos(
           .padStart(2, "0")} minutos`
       }
 
-      console.log()
-
       if (opciones.esValidacion) {
         // El codigo de verificacion debe ser igual
         //Si el contador va arriba de 2 BLOQUEAMOS
@@ -119,7 +111,6 @@ async function comprobarIntentos(
           ).exec()
         }
 
-        console.log({ lasOpciones: opciones })
         if (opciones.usuario.email_validado.codigo != opciones.codigo) {
           //Si el contador no va arriba sumamos +1 intentos
           await Usuario.updateOne(
@@ -129,10 +120,6 @@ async function comprobarIntentos(
           console.log(opciones)
           throw msjError_codigo_no_valido
         }
-      }
-
-      if (opciones.esLogin) {
-        throw "No se a definido"
       }
 
       //Si todo fue bien, pues devolvemos todas las opciones
