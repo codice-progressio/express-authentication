@@ -1,3 +1,15 @@
+const ExpressBrute = require("express-brute")
+const MongooseStore = require("express-brute-mongoose")
+const BruteForceSchema = require("express-brute-mongoose/dist/schema")
+const mongoose = require("mongoose")
+
+const model = mongoose.model(
+  "bruteforce",
+  new mongoose.Schema(BruteForceSchema)
+)
+const store = new MongooseStore(model)
+const bruteforce = new ExpressBrute(store)
+
 const msjError_codigo_no_valido = "El código no es valido"
 
 function comprobarAdministradorMismoUsuario(req, res, next) {
@@ -117,7 +129,6 @@ async function comprobarIntentos(
             { _id: opciones.usuario._id },
             { $inc: { "email_validado.intentos": 1 } }
           ).exec()
-          console.log(opciones)
           throw msjError_codigo_no_valido
         }
       }
@@ -136,6 +147,7 @@ module.exports = {
   create_administrador: {
     metodo: "post",
     path: "/crear-administrador",
+    pre_middlewares: [bruteforce.prevent],
     // No requiere permiso
     permiso: "",
     cb: async (req, res, next) => {
@@ -175,6 +187,7 @@ module.exports = {
     metodo: "post",
     path: "/login",
     permiso: "",
+    pre_middlewares: [bruteforce.prevent],
     cb: (req, res, next) => {
       const password = req.body?.password
       const email = req.body?.email
@@ -263,6 +276,7 @@ module.exports = {
   read_confirmar: {
     metodo: "get",
     path: "/confirmar",
+    pre_middlewares: [bruteforce.prevent],
     permiso: "",
     cb: (req, res, next) => {
       // Debemos resibir un query
@@ -284,6 +298,8 @@ module.exports = {
         .select("+email_validado")
         .exec()
         .then(async usuario => {
+          console.log(usuario)
+          if (usuario.email_validado.validado) throw "El link caduco"
           if (!usuario) throw msjError_codigo_no_valido
 
           return comprobarIntentos({
@@ -295,10 +311,12 @@ module.exports = {
         .then(opciones => {
           // La comprobacion salio correcta, por lo tanto hacemos lo que tenemos
           // que hacer.
-          let usuario = opciones.usuario
-          usuario.email_validado.validado = true
-          usuario.email_validado.codigo = null
-          return usuario.save()
+          return Usuario.updateOne(
+            { _id: opciones.usuario._id },
+            {
+              "email_validado.validado": true,
+            }
+          ).exec()
         })
         .then(usuario => res.send({ usuario }))
         .catch(_ => next(_))
