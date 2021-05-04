@@ -12,7 +12,7 @@ const bruteforce = new ExpressBrute(store)
 
 const msjError_codigo_no_valido = "El código no es valido"
 
-function comprobarAdministradorMismoUsuario(req, res, next) {
+function comprobarAdministradorMismoUsuario(req) {
   //Solo el mismo usuario se puede modificar estos datos
   // o si es administrador puede cambiar el de cualquiera
   const config = require("./configuraciones")
@@ -55,94 +55,6 @@ const generarCodigoDeActivacion = () => {
   return Math.floor(100000 + Math.random() * 900000)
 }
 
-async function comprobarIntentos(
-  opciones = {
-    codigo: undefined,
-    esLogin: true,
-    esValidacion: false,
-    usuario: undefined,
-  }
-) {
-  //Ningun usuario bloqueado se comprueba
-
-  return new Promise(async (resolve, reject) => {
-    const Usuario = require("./models/usuario.model")
-    async function reiniciarContadores() {
-      try {
-        // Reiniciamos los contadores.
-        await Usuario.updateOne(
-          { _id: opciones.usuario._id },
-          {
-            "email_validado.intentos": 0,
-            "email_validado.bloqueado": false,
-            "email_validado.intento_hora": null,
-          }
-        ).exec()
-      } catch (error) {
-        reject(error)
-      }
-    }
-
-    try {
-      //Si el usuario esta bloqueado, debe de tener una hora a la que se bloqueo.
-      if (opciones.usuario.email_validado.bloqueado) {
-        // Para desbloquearlo deben pasar los mínutos definidos.
-        const { DateTime } = require("luxon")
-        let minutosFaltantes = DateTime.fromISO(
-          new Date(opciones.usuario.email_validado.intento_hora).toISOString()
-        )
-          .plus({ minutes: 5 })
-          .diffNow(["minutes", "seconds"])
-
-        // Si los minutos son 0 ó negativos desbloqueamos para el siguiente intento
-        if (minutosFaltantes <= 0) {
-          await reiniciarContadores()
-          // Modificamos minutos faltantes para que muestre solo 0 en caso de que
-          // sea mayor, esto con fines de estilo.
-          minutosFaltantes = 0
-        }
-
-        throw `Demasiados intentos. Vuelve a intentar en ${minutosFaltantes.minutes
-          .toString()
-          .padStart(2, "0")}:${minutosFaltantes.seconds
-          .toFixed(0)
-          .toString()
-          .padStart(2, "0")} minutos`
-      }
-
-      if (opciones.esValidacion) {
-        // El codigo de verificacion debe ser igual
-        //Si el contador va arriba de 2 BLOQUEAMOS
-        if (opciones.usuario.email_validado.intentos > 1) {
-          await Usuario.updateOne(
-            { _id: opciones.usuario._id },
-            {
-              "email_validado.bloqueado": true,
-              "email_validado.intento_hora": new Date(),
-            }
-          ).exec()
-        }
-
-        if (opciones.usuario.email_validado.codigo != opciones.codigo) {
-          //Si el contador no va arriba sumamos +1 intentos
-          await Usuario.updateOne(
-            { _id: opciones.usuario._id },
-            { $inc: { "email_validado.intentos": 1 } }
-          ).exec()
-          throw msjError_codigo_no_valido
-        }
-      }
-
-      //Si todo fue bien, pues devolvemos todas las opciones
-      // y de paso reiniciamos todos los valores de intentos.
-      await reiniciarContadores()
-      resolve(opciones)
-    } catch (error) {
-      reject(error)
-    }
-  })
-}
-
 module.exports = {
   create_administrador: {
     metodo: "post",
@@ -177,7 +89,7 @@ module.exports = {
           us.password = utilidades.emoticones.random()
           return enviarCorreoConfirmacionUsuario(us)
         })
-        .then(mail => {
+        .then(() => {
           res.send({ usuario: us })
         })
         .catch(_ => next(_))
@@ -302,17 +214,14 @@ module.exports = {
           if (usuario.email_validado.validado) throw "El link caduco"
           if (!usuario) throw msjError_codigo_no_valido
 
-          return comprobarIntentos({
-            usuario,
-            codigo,
-            esValidacion: true,
-          })
-        })
-        .then(opciones => {
+          // El codigo recibido debe ser igual al almacenado por el usuario
+          let esIgual = usuario.email_validado.codigo == codigo
+          if (!esIgual) throw msjError_codigo_no_valido
+
           // La comprobacion salio correcta, por lo tanto hacemos lo que tenemos
           // que hacer.
           return Usuario.updateOne(
-            { _id: opciones.usuario._id },
+            { _id: usuario._id },
             {
               "email_validado.validado": true,
             }
@@ -387,6 +296,45 @@ module.exports = {
   update_password: {
     metodo: "put",
     path: "/password/:id",
+    cb: async (req, res, next) => {
+      let password = req.body?.password
+      if (!password) throw next("No definiste el password")
+
+      let puedeModificar = comprobarAdministradorMismoUsuario(req, res, next)
+      if (!puedeModificar)
+        throw next({ error: "No puedes modificar el password de otro usuario" })
+
+      let Usuario = require("./models/usuario.model")
+
+      let id = req.params.id
+      let usuario = await Usuario.findById(id).select("password").exec()
+      if (!usuario) throw next("No existe el id")
+
+      codice_security.hash
+        .crypt(password)
+        .then(pass => {
+          usuario.password = pass
+          return usuario.save()
+        })
+        .then(() => res.send())
+        .catch(_ => next(_))
+    },
+  },
+
+  // Generamos un link de recuperacion de password para el usaurio
+  update_link_recuperar_password: {
+    metodo: "get",
+    path: "/generar-link-recuperar-password",
+    pre_middlewares: [bruteforce.prevent],
+    cb: (req, res, next) => {
+      // 1.- Si el usuario no existeF
+    },
+  },
+
+  update_recuperar_password: {
+    metodo: "get",
+    path: "/recuperar-password",
+    pre_middlewares: [bruteforce.prevent],
     cb: async (req, res, next) => {
       let password = req.body?.password
       if (!password) throw next("No definiste el password")

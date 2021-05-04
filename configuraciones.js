@@ -17,6 +17,7 @@ const configuraciones = {
         "/usuario/login",
         "/usuario/crear-administrador",
         "/usuario/confirmar",
+        "/usuario/recuperar-contraseña",
       ],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
@@ -57,9 +58,6 @@ const configuraciones = {
         type: {
           codigo: String,
           validado: { type: Boolean, default: false },
-          intentos: { type: Number, default: 0 },
-          intento_hora: Date,
-          bloqueado: { default: false, type: Boolean },
         },
         select: false,
       },
