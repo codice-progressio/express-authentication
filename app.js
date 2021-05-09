@@ -60,11 +60,11 @@ db.once("open", () => {
     res.send("Hello World!")
   })
 
-  app.use((err, req, res, next) => {
-    log(err)
+  app.use((error, req, res, next) => {
+    log(error)
     // SEGURIDAD - captura de errores
     let errorJWT = codice_security.configuraciones.validaciones.errores.jwt(
-      err,
+      error,
       res
     )
 
@@ -74,7 +74,7 @@ db.once("open", () => {
     }
     // SEGURIDAD - captura de errores - fin
 
-    res.status(500).send({ err })
+    res.status(500).send({ err: error })
   })
 
   app.listen(port, () => {
