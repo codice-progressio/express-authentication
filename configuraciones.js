@@ -17,7 +17,8 @@ const configuraciones = {
         "/usuario/login",
         "/usuario/crear-administrador",
         "/usuario/confirmar",
-        "/usuario/recuperar-contraseña",
+        "/usuario/recuperar-password-email",
+        "/usuario/generar-link-recuperar-password",
       ],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
@@ -58,6 +59,10 @@ const configuraciones = {
         type: {
           codigo: String,
           validado: { type: Boolean, default: false },
+          recuperar_contrasena: { type: Boolean, default: false },
+          intentos: { type: Number, default: 0 },
+          intento_hora: Date,
+          bloqueado: { default: false, type: Boolean },
         },
         select: false,
       },
@@ -77,11 +82,12 @@ const configuraciones = {
       from: undefined,
     },
     dominio: undefined,
+    dominio_recuperacion: undefined,
     nombre_aplicacion: undefined,
   },
 }
 
-function validaciones(err, res) {
+function validaciones(err) {
   if (err.name === "UnauthorizedError")
     return { status: 401, send: { error: "No autorizado" } }
   return null

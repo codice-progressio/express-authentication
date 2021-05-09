@@ -69,8 +69,117 @@ function enviarCorreoConfirmacionUsuario(us) {
   return utilidades.correo(mailOptions)
 }
 
-const generarCodigoDeActivacion = () => {
+function enviarCorreoRecuperacionContrasena(usuario) {
+  const configuraciones = require("./configuraciones")
+  let html = require("./plantillas.email").correo_recuperacion_password({
+    link_confirmacion: configuraciones.correo.dominio + "/usuario/confirmar",
+    codigo: usuario.email_validado.codigo + usuario._id,
+    nombre: usuario.nombre,
+    nombre_aplicacion: configuraciones.correo.nombre_aplicacion,
+  })
+
+  var mailOptions = {
+    from: configuraciones.correo.mailOptions.from,
+    to: usuario.email,
+    subject:
+      configuraciones.correo.mailOptions.from + " - Recuperar contraseña",
+    html,
+  }
+  const utilidades = require("./utilidades")
+  return utilidades.correo(mailOptions)
+}
+
+const generarCodigoDeActivacion_Recuperacion = () => {
   return Math.floor(100000 + Math.random() * 900000)
+}
+
+async function comprobarIntentos(
+  opciones = {
+    codigo: undefined,
+    esLogin: true,
+    esValidacion: false,
+    usuario: undefined,
+  }
+) {
+  //Ningun usuario bloqueado se comprueba
+
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    const Usuario = require("./models/usuario.model")
+    async function reiniciarContadores() {
+      try {
+        // Reiniciamos los contadores.
+        await Usuario.updateOne(
+          { _id: opciones.usuario._id },
+          {
+            "email_validado.intentos": 0,
+            "email_validado.bloqueado": false,
+            "email_validado.intento_hora": null,
+          }
+        ).exec()
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    try {
+      //Si el usuario esta bloqueado, debe de tener una hora a la que se bloqueo.
+      if (opciones.usuario.email_validado.bloqueado) {
+        // Para desbloquearlo deben pasar los mínutos definidos.
+        const { DateTime } = require("luxon")
+        let minutosFaltantes = DateTime.fromISO(
+          new Date(opciones.usuario.email_validado.intento_hora).toISOString()
+        )
+          .plus({ minutes: 5 })
+          .diffNow(["minutes", "seconds"])
+
+        // Si los minutos son 0 ó negativos desbloqueamos para el siguiente intento
+        if (minutosFaltantes <= 0) {
+          await reiniciarContadores()
+          // Modificamos minutos faltantes para que muestre solo 0 en caso de que
+          // sea mayor, esto con fines de estilo.
+          minutosFaltantes = 0
+        }
+
+        throw `Demasiados intentos. Vuelve a intentar en ${minutosFaltantes.minutes
+          .toString()
+          .padStart(2, "0")}:${minutosFaltantes.seconds
+          .toFixed(0)
+          .toString()
+          .padStart(2, "0")} minutos`
+      }
+
+      if (opciones.esValidacion) {
+        // El codigo de verificacion debe ser igual
+        //Si el contador va arriba de 2 BLOQUEAMOS
+        if (opciones.usuario.email_validado.intentos > 1) {
+          await Usuario.updateOne(
+            { _id: opciones.usuario._id },
+            {
+              "email_validado.bloqueado": true,
+              "email_validado.intento_hora": new Date(),
+            }
+          ).exec()
+        }
+
+        if (opciones.usuario.email_validado.codigo != opciones.codigo) {
+          //Si el contador no va arriba sumamos +1 intentos
+          await Usuario.updateOne(
+            { _id: opciones.usuario._id },
+            { $inc: { "email_validado.intentos": 1 } }
+          ).exec()
+          throw msjError_codigo_no_valido
+        }
+      }
+
+      //Si todo fue bien, pues devolvemos todas las opciones
+      // y de paso reiniciamos todos los valores de intentos.
+      await reiniciarContadores()
+      resolve(opciones)
+    } catch (error) {
+      reject(error)
+    }
+  })
 }
 
 module.exports = {
@@ -96,9 +205,12 @@ module.exports = {
         .crypt(req.body.password)
         .then(async password => {
           let usuario = new Usuario(req.body)
+          usuario.email = usuario.email.toLowerCase()
           usuario.password = password
           usuario.permissions.push("administrador")
-          usuario["email_validado"] = { codigo: generarCodigoDeActivacion() }
+          usuario["email_validado"] = {
+            codigo: generarCodigoDeActivacion_Recuperacion(),
+          }
           return usuario.save()
         })
         .then(usuario => {
@@ -221,31 +333,35 @@ module.exports = {
       const Usuario = require("./models/usuario.model")
       // Comprobamos que el usuario este esperando un codigo de
       // de confirmacion.
-
-      console.log({ codigo, _id })
       Usuario.findById(_id)
         // Cargamos la propiedad en el modelo.
         .select("+email_validado")
         .exec()
         .then(async usuario => {
-          console.log(usuario)
-          if (usuario.email_validado.validado) throw "El link caduco"
           if (!usuario) throw msjError_codigo_no_valido
+          if (usuario.email_validado?.validado) throw "El link caduco"
 
-          // El codigo recibido debe ser igual al almacenado por el usuario
-          let esIgual = usuario.email_validado.codigo == codigo
-          if (!esIgual) throw msjError_codigo_no_valido
-
+          return comprobarIntentos({
+            usuario,
+            codigo,
+            esValidacion: true,
+          })
+        })
+        .then(opciones => {
           // La comprobacion salio correcta, por lo tanto hacemos lo que tenemos
           // que hacer.
           return Usuario.updateOne(
-            { _id: usuario._id },
+            { _id: opciones.usuario._id },
             {
               "email_validado.validado": true,
             }
           ).exec()
         })
-        .then(usuario => res.send({ usuario }))
+        .then(usuario => {
+          if (usuario.nModified !== 1)
+            throw "Hubo un problema validando al usuario"
+          res.send({ mensaje: "Usuario habilitado" })
+        })
         .catch(_ => next(_))
     },
   },
@@ -265,8 +381,11 @@ module.exports = {
         .crypt(req.body.password)
         .then(async password => {
           let usuario = new Usuario(req.body)
+          usuario.email = usuario.email.toLowerCase()
           usuario.password = password
-          usuario["email_validado"] = { codigo: generarCodigoDeActivacion() }
+          usuario["email_validado"] = {
+            codigo: generarCodigoDeActivacion_Recuperacion(),
+          }
           return usuario.save()
         })
         .then(usuario => {
@@ -274,7 +393,7 @@ module.exports = {
           us = usuario
           return enviarCorreoConfirmacionUsuario(us)
         })
-        .then(email => {
+        .then(() => {
           res.send({ usuario: us })
         })
         .catch(_ => next(_))
@@ -328,6 +447,7 @@ module.exports = {
       let usuario = await Usuario.findById(id).select("password").exec()
       if (!usuario) throw next("No existe el id")
 
+      let codice_security = require("./index")
       codice_security.hash
         .crypt(password)
         .then(pass => {
@@ -340,40 +460,84 @@ module.exports = {
   },
 
   // Generamos un link de recuperacion de password para el usaurio
-  update_link_recuperar_password: {
+  update_generar_link_recuperar_password: {
     metodo: "get",
     path: "/generar-link-recuperar-password",
     pre_middlewares: [bruteforce.prevent],
     cb: (req, res, next) => {
-      // 1.- Si el usuario no existeF
+      let Usuario = require("./models/usuario.model")
+
+      if (!req?.query?.email) return next("Es necesario el correo")
+
+      Usuario.findOne({ email: req.query.email })
+        .select("email_validado email nombre")
+        .exec()
+        .then(async usuario => {
+          if (!usuario) return
+          // no retornamos naa
+          else {
+            // Modificamos al usuario
+            usuario.email_validado.recuperar_contrasena = true
+            usuario.email_validado.codigo = generarCodigoDeActivacion_Recuperacion()
+            usuario.markModified("email_validado.recuperar_contrasena")
+
+            let us = await usuario.save()
+            return enviarCorreoRecuperacionContrasena(us)
+          }
+        })
+        .then(() =>
+          // Si no exite el email, no se va a enviar nada,pero shhhh!
+          res.send({ mensaje: `Se envío un correo a ${req.query.email}` })
+        )
+        .catch(_ => next(_))
     },
   },
 
-  update_recuperar_password: {
+  update_recuperar_password_email: {
     metodo: "get",
-    path: "/recuperar-password",
+    path: "/recuperar-password-email",
     pre_middlewares: [bruteforce.prevent],
+    permiso: "",
     cb: async (req, res, next) => {
+      //Debemos obtener el password nuevo
       let password = req.body?.password
       if (!password) throw next("No definiste el password")
-
-      let puedeModificar = comprobarAdministradorMismoUsuario(req, res, next)
-      if (!puedeModificar)
-        throw next({ error: "No puedes modificar el password de otro usuario" })
-
       let Usuario = require("./models/usuario.model")
 
-      let id = req.params.id
-      let usuario = await Usuario.findById(id).select("password").exec()
-      if (!usuario) throw next("No existe el id")
+      let codigoCompleto = req.body.codigo
+      // El código es de 6 digitos.
+      let codigo = codigoCompleto.slice(0, 6)
+      // Y despues debe incluir el id del usuario.
+      let id = codigoCompleto.slice(6)
 
-      codice_security.hash
-        .crypt(password)
+      //Buscamos al usuario.
+      let usuario = await Usuario.findById(id)
+        .select("password email_validado")
+        .exec()
+      // El usuario debe de existir y debe estar esperando para recuperar contraseña
+
+      let msjError = "Usuario no valido"
+      if (!usuario || !usuario.email_validado?.recuperar_contrasena)
+        return next(msjError)
+
+      //Comprobamos el codigo
+      comprobarIntentos({
+        usuario,
+        codigo,
+        esValidacion: false,
+      })
+        .then(() => {
+          let codice_security = require("./index")
+          return codice_security.hash.crypt(password)
+        })
+
         .then(pass => {
           usuario.password = pass
           return usuario.save()
         })
-        .then(() => res.send())
+        .then(() =>
+          res.send({ mensaje: "Se modifico la contraseña correctamente" })
+        )
         .catch(_ => next(_))
     },
   },
