@@ -473,6 +473,9 @@ module.exports = {
         .select("email_validado email nombre")
         .exec()
         .then(async usuario => {
+          //Debe estar validado
+          if (!usuario.email_validado.validado)
+            return next("Usuario no validado")
           if (!usuario) return
           // no retornamos naa
           else {
@@ -517,7 +520,7 @@ module.exports = {
       // El usuario debe de existir y debe estar esperando para recuperar contraseña
 
       let msjError = "Usuario no valido"
-      if (!usuario || !usuario.email_validado?.recuperar_contrasena)
+      if (!usuario || !usuario.email_validado?.recuperar_contrasena || !codigo)
         return next(msjError)
 
       //Comprobamos el codigo
@@ -533,6 +536,10 @@ module.exports = {
 
         .then(pass => {
           usuario.password = pass
+          usuario.email_validado.recuperar_contrasena = false
+          usuario.email_validado.codigo = null
+          usuario.markModified("email_validado.recuperar_contrasena")
+
           return usuario.save()
         })
         .then(() =>
