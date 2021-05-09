@@ -8,7 +8,25 @@ const model = mongoose.model(
   new mongoose.Schema(BruteForceSchema)
 )
 const store = new MongooseStore(model)
-const bruteforce = new ExpressBrute(store)
+const bruteforce = new ExpressBrute(store, {
+  freeRetries: 5,
+  failCallback: (req, res, next, nextValidDate) => {
+    const { DateTime } = require("luxon")
+    let proximaHoraValida = DateTime.fromISO(
+      new Date(nextValidDate).toISOString()
+    ).diffNow(["hours", "minutes", "seconds"])
+
+    return res.send({
+      mensaje: `Demasiados intentos en muy poco tiempo. Vuelve a intentarlo en ${proximaHoraValida.hours
+        .toString()
+        .padStart(2, "0")}:${proximaHoraValida.minutes
+        .toString()
+        .padStart(2, "0")}:${proximaHoraValida.seconds
+        .toString()
+        .padStart(2, "0")}`,
+    })
+  },
+})
 
 const msjError_codigo_no_valido = "El código no es valido"
 
