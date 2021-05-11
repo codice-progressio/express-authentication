@@ -53,7 +53,7 @@ const configuraciones = {
         type: [String],
         select: false,
       },
-      eliminado: { type: Boolean, default: false },
+      inhabilitado: { type: Boolean, default: false },
       email_validado: {
         type: {
           codigo: String,
@@ -99,7 +99,7 @@ const configuraciones = {
       permiso: "usuario:crear",
       descripcion: "Crear un nuevo usuario",
     },
-   
+
     agregar_permiso: {
       permiso: "usuario:modificar:agregar-permiso",
       descripcion: "Crea un nuevo permiso al usuario",

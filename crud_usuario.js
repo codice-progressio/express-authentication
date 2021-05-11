@@ -255,7 +255,7 @@ module.exports = {
           //Debe estaer validado para hacer login
           if (!usuario.email_validado.validado)
             throw "El usuario no ha sido validado"
-          if (usuario.eliminado) throw "El usuario ha sido eliminado"
+          if (usuario.inhabilitado) throw "El usuario está inhabilitado"
           // Comprobamos el password
           return codice_security.hash.compare(password, usuario.password)
         })
@@ -616,6 +616,73 @@ module.exports = {
           return usuario.save()
         })
         .then(usuario => res.send({ usuario }))
+        .catch(_ => next(_))
+    },
+  },
+
+  // Elimina completamente un usuario
+  delete_eliminar_usuario: {
+    metodo: "delete",
+    path: "/:id",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+
+      let id = req.params.id
+
+      Usuario.findById(id)
+        .then(usuario => {
+          if (!usuario) throw "No existe el id"
+          return usuario.remove()
+        })
+        .then(usuario => {
+          res.send({ usuario })
+        })
+        .catch(_ => next(_))
+    },
+  },
+  // Inhabilita al usuario
+  delete_inhabilitar_usuario: {
+    metodo: "delete",
+    path: "/inhabilitar/:id",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+      let id = req.params.id
+      Usuario.findById(id)
+        .select("inhabilitado")
+        .then(usuario => {
+          if (!usuario) throw "No existe el id"
+          usuario.inhabilitado = true
+          return usuario.save()
+        })
+        .then(usuario => {
+          res.send({ usuario })
+        })
+        .catch(_ => next(_))
+    },
+  },
+  // Inhabilita al usuario
+  update_inhabilitar_usuario: {
+    metodo: "put",
+    path: "/habilitar/:id",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+      let id = req.params.id
+      Usuario.findById(id)
+        .select("inhabilitado")
+        .then(usuario => {
+          if (!usuario) throw "No existe el id"
+          usuario.inhabilitado = false
+          return usuario.save()
+        })
+        .then(usuario => {
+          res.send({ usuario })
+        })
         .catch(_ => next(_))
     },
   },
