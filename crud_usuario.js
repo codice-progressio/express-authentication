@@ -389,7 +389,9 @@ module.exports = {
           usuario.email = usuario.email.toLowerCase()
           usuario.password = password
           //Permiso por defecto
-          usuario.permissions.push(require("./configuraciones").permisos.login)
+          usuario.permissions.push(
+            require("./configuraciones").permisos.login.permiso
+          )
           usuario["email_validado"] = {
             codigo: generarCodigoDeActivacion_Recuperacion(),
           }
