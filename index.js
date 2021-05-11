@@ -13,7 +13,17 @@ const usuarioModel = require("./models/usuario.model")
  * @returns Libreria cors configurada para aplicar a un middleware directamente
  */
 module.exports.basico = function () {
-  log("Seguridad establecida: ", configuraciones.cors)
+  // Importa la libreria
+  const easyPermissions = require("@codice-progressio/easy-permissions")
+  // Setea los parametros básicos de configuración
+  easyPermissions.config({
+    modoProduccion: false,
+    generarPermisos: true,
+  })
+
+  log("easy-permissions: ", easyPermissions.configuraciones)
+
+  log("CORS: ", configuraciones.cors)
   app.use(cors(configuraciones.cors))
 
   log("Decodificacion de token", configuraciones.jwt.decode)

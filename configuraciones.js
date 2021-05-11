@@ -51,7 +51,6 @@ const configuraciones = {
       },
       permissions: {
         type: [String],
-        default: ["login"],
         select: false,
       },
       eliminado: { type: Boolean, default: false },
@@ -85,6 +84,35 @@ const configuraciones = {
     dominio_recuperacion: undefined,
     nombre_aplicacion: undefined,
   },
+
+  permisos: {
+    leer_todo: {
+      permiso: "usuario:leer:todo",
+      descripcion: "Leer todos los usuarios registrados en el sistema. ",
+    },
+
+    login: {
+      permiso: "login",
+      descripcion: "Iniciar sesión en el sistema",
+    },
+    crear_usuario: {
+      permiso: "usuario:crear",
+      descripcion: "Crear un nuevo usuario",
+    },
+   
+    agregar_permiso: {
+      permiso: "usuario:modificar:agregar-permiso",
+      descripcion: "Crea un nuevo permiso al usuario",
+    },
+
+    administrador: {
+      permiso: "administrador",
+      descripcion: "Permisos de administrador",
+    },
+  },
+
+  easy_permissions: require("@codice-progressio/easy-permissions")
+    .configuraciones,
 }
 
 function validaciones(err) {

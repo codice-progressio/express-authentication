@@ -188,18 +188,19 @@ module.exports = {
     path: "/crear-administrador",
     pre_middlewares: [bruteforce.prevent],
     // No requiere permiso
-    permiso: "",
+    permiso: null,
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
+      let permisos = require("./configuraciones").permisos
 
       let administrador = await Usuario.find({
-        permissions: "administrador",
+        permissions: permisos.administrador.permiso,
       }).countDocuments()
       if (administrador > 0) return next("Ya existe el administrador")
 
       let codice_security = require("./index")
 
-      if (!req.body?.password) throw next("No definiste el password")
+      if (!req.body?.password) return next("No definiste el password")
       let us = null
       codice_security.hash
         .crypt(req.body.password)
@@ -207,7 +208,12 @@ module.exports = {
           let usuario = new Usuario(req.body)
           usuario.email = usuario.email.toLowerCase()
           usuario.password = password
-          usuario.permissions.push("administrador")
+
+          // Agregamos todos los permisos al usuario administrador
+          Object.keys(permisos).forEach(x =>
+            usuario.permissions.push(permisos[x].permiso)
+          )
+
           usuario["email_validado"] = {
             codigo: generarCodigoDeActivacion_Recuperacion(),
           }
@@ -228,7 +234,7 @@ module.exports = {
   login: {
     metodo: "post",
     path: "/login",
-    permiso: "",
+    permiso: null,
     pre_middlewares: [bruteforce.prevent],
     cb: (req, res, next) => {
       const password = req.body?.password
@@ -265,7 +271,7 @@ module.exports = {
   read: {
     metodo: "get",
     path: "/",
-    permiso: "administrador",
+    permiso: require("./configuraciones").permisos.leer_todo,
     cb: async (req, res, next) => {
       // Obtener y filtrar todos los usuarios
       const limit = (req.params.limit ?? 10) * 1
@@ -299,7 +305,7 @@ module.exports = {
   read_id: {
     metodo: "get",
     path: "/id/:id",
-    permiso: "login",
+    permiso: require("./configuraciones").permisos.login,
     cb: (req, res, next) => {
       // Un usuario diferente no puede leer los datos de otro usuario
       let paso = comprobarAdministradorMismoUsuario(req, res, next)
@@ -319,7 +325,7 @@ module.exports = {
     metodo: "get",
     path: "/confirmar",
     pre_middlewares: [bruteforce.prevent],
-    permiso: "",
+    permiso: null,
     cb: (req, res, next) => {
       // Debemos resibir un query
       const codigoCompleto = req.query?.codigo
@@ -369,12 +375,11 @@ module.exports = {
   create: {
     metodo: "post",
     path: "/",
-    permiso: "administrador",
+    permiso: require("./configuraciones").permisos.crear,
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
       let codice_security = require("./index")
       let us = null
-      // Si es el primer usuario, entonces lo hacemos administrador.
 
       if (!req.body?.password) throw next("No definiste el password")
       codice_security.hash
@@ -383,6 +388,8 @@ module.exports = {
           let usuario = new Usuario(req.body)
           usuario.email = usuario.email.toLowerCase()
           usuario.password = password
+          //Permiso por defecto
+          usuario.permissions.push(require("./configuraciones").permisos.login)
           usuario["email_validado"] = {
             codigo: generarCodigoDeActivacion_Recuperacion(),
           }
@@ -406,7 +413,7 @@ module.exports = {
   update: {
     metodo: "put",
     path: "/id/:id",
-    permiso: "login",
+    permiso: require("./configuraciones").permisos.login,
     cb: async (req, res, next) => {
       let puedeModificar = comprobarAdministradorMismoUsuario(req, res, next)
 
@@ -417,7 +424,6 @@ module.exports = {
 
       let id = req.params.id
       let usuario = await Usuario.findById(id).select("nombre email").exec()
-
       if (!usuario) throw next("No existe el id")
 
       if (req.body?.nombre) usuario.nombre = req.body.nombre
@@ -433,6 +439,7 @@ module.exports = {
   update_password: {
     metodo: "put",
     path: "/password/:id",
+    permiso: require("./configuraciones").permisos.login,
     cb: async (req, res, next) => {
       let password = req.body?.password
       if (!password) throw next("No definiste el password")
@@ -464,6 +471,7 @@ module.exports = {
     metodo: "get",
     path: "/generar-link-recuperar-password",
     pre_middlewares: [bruteforce.prevent],
+    permisos: null,
     cb: (req, res, next) => {
       let Usuario = require("./models/usuario.model")
 
@@ -481,7 +489,8 @@ module.exports = {
           else {
             // Modificamos al usuario
             usuario.email_validado.recuperar_contrasena = true
-            usuario.email_validado.codigo = generarCodigoDeActivacion_Recuperacion()
+            usuario.email_validado.codigo =
+              generarCodigoDeActivacion_Recuperacion()
             usuario.markModified("email_validado.recuperar_contrasena")
 
             let us = await usuario.save()
@@ -500,7 +509,7 @@ module.exports = {
     metodo: "get",
     path: "/recuperar-password-email",
     pre_middlewares: [bruteforce.prevent],
-    permiso: "",
+    permiso: null,
     cb: async (req, res, next) => {
       //Debemos obtener el password nuevo
       let password = req.body?.password
@@ -545,6 +554,59 @@ module.exports = {
         .then(() =>
           res.send({ mensaje: "Se modifico la contraseña correctamente" })
         )
+        .catch(_ => next(_))
+    },
+  },
+  update_agregar_permiso: {
+    metodo: "put",
+    path: "/agregar-permiso",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+
+      let permiso = req.body.permiso
+      if (!permiso) return next("No se recibio ningún permiso")
+      // El permiso debe existir en la lista.
+      let permisos = Object.keys(require("./seguridad/permisos.seguridad"))
+      if (!permisos.includes(permiso))
+        return next("El permiso enviado no es válido")
+
+      //Buscamos al usuario.
+      Usuario.findById(req.body._id)
+        .select("permissions")
+        .exec()
+        .then(usuario => {
+          if (!usuario) throw "No existee el id"
+          if (usuario.permissions.includes(permiso))
+            throw "El usuario ya tiene el permiso"
+          usuario.permissions.push(permiso)
+          return usuario.save()
+        })
+        .then(usuario => res.send({ usuario }))
+        .catch(_ => next(_))
+    },
+  },
+  update_eliminar_permiso: {
+    metodo: "put",
+    path: "/eliminar-permiso",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+
+      let permiso = req.body.permiso
+      if (!permiso) return next("No se recibio ningún permiso")
+      //Buscamos al usuario.
+      Usuario.findById(req.body._id)
+        .select("permissions")
+        .exec()
+        .then(usuario => {
+          if (!usuario) throw "No existe el id"
+          usuario.permissions.pull(permiso)
+          return usuario.save()
+        })
+        .then(usuario => res.send({ usuario }))
         .catch(_ => next(_))
     },
   },

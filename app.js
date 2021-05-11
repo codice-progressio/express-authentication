@@ -35,7 +35,8 @@ db.once("open", () => {
   //  CORREO
 
   codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
-  codice_security.configuraciones.correo.dominio_recuperacion = process.env.CORREO_DOMINIO_RECUPERACION
+  codice_security.configuraciones.correo.dominio_recuperacion =
+    process.env.CORREO_DOMINIO_RECUPERACION
   codice_security.configuraciones.correo.nombre_aplicacion =
     process.env.CORREO_NOMBRE_APLICACION
   codice_security.configuraciones.correo.transport.host =
