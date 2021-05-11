@@ -76,7 +76,7 @@ db.once("open", () => {
     }
     // SEGURIDAD - captura de errores - fin
 
-    res.status(500).send({ err: error })
+    res.status(500).send({ error })
   })
 
   app.listen(port, () => {
