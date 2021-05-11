@@ -283,7 +283,7 @@ a.badge-dark:hover {color:#fff !important;background-color:#1d2124 !important
 <tr>
 <td style="line-height: 24px; font-size: 16px; margin: 0; border-spacing: 0px; border-collapse: collapse; padding: 12px 20px; width: 100%;" width="100%">
 <div class="" data-bte-removed-class="card-body">
-<h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">CODICE SECURITY</h1>
+<h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">${datos.nombre_aplicacion}</h1>
 <h5 style="margin-top: 0; margin-bottom: 0; font-weight: 400; color: inherit; text-align: left; vertical-align: baseline; font-size: 20px; line-height: 26px;">¡Hola ${datos.nombre}!, tienes un registro de cuenta pendiente.</h5>
 <br>
 
@@ -669,7 +669,7 @@ a.badge-dark:hover {color:#fff !important;background-color:#1d2124 !important
 <tr>
   <td style="line-height: 24px; font-size: 16px; margin: 0; border-spacing: 0px; border-collapse: collapse; padding: 12px 20px; width: 100%;" width="100%">
     <div class="" data-bte-removed-class="card-body">
-        <h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">CODICE SECURITY</h1>
+        <h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">${datos.nombre_aplicacion}</h1>
         <h5 style="margin-top: 0; margin-bottom: 0; font-weight: 400; color: inherit; text-align: left; vertical-align: baseline; font-size: 20px; line-height: 26px;">
           ¡Hola ${datos.nombre}!, hemos recibido una solicitud para restaurar
           tu contraseña en ${datos.nombre_aplicacion}

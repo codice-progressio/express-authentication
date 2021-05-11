@@ -61,8 +61,8 @@ function enviarCorreoConfirmacionUsuario(us) {
     from: configuraciones.correo.mailOptions.from,
     to: us.email,
     subject:
-      configuraciones.correo.mailOptions.from +
-      " - Se ha creado un usuario con tu correo",
+      "Se ha creado un usuario con tu correo | " +
+      configuraciones.correo.nombre_aplicacion,
     html,
   }
   const utilidades = require("./utilidades")
@@ -82,7 +82,7 @@ function enviarCorreoRecuperacionContrasena(usuario) {
     from: configuraciones.correo.mailOptions.from,
     to: usuario.email,
     subject:
-      configuraciones.correo.mailOptions.from + " - Recuperar contraseña",
+      "Recuperar contraseña | " + configuraciones.correo.nombre_aplicacion,
     html,
   }
   const utilidades = require("./utilidades")
