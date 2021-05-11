@@ -246,22 +246,29 @@ module.exports = {
       // El usuario debe existir.
       const Usuario = require("./models/usuario.model")
       Usuario.findOne({ email })
-        .select("+password +permissions")
+        .select("+password +permissions +email_validado")
         .lean()
         .exec()
         .then(usuario => {
           if (!usuario) throw credencialesError
           usuarioBD = usuario
+          //Debe estaer validado para hacer login
+          if (!usuario.email_validado.validado)
+            throw "El usuario no ha sido validado"
+          if (usuario.eliminado) throw "El usuario ha sido eliminado"
           // Comprobamos el password
           return codice_security.hash.compare(password, usuario.password)
         })
         .then(passwordCorrecto => {
           if (!passwordCorrecto) throw credencialesError
           delete usuarioBD.password
+          delete usuarioBD.email_validado
           //Firmamos un token
+          console.log(usuarioBD)
           return codice_security.token.generar(usuarioBD)
         })
         .then(token => {
+          console.log(token)
           res.send({ token })
         })
         .catch(err => next(err))
