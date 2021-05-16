@@ -14,37 +14,52 @@ Los valores requeridos para que funcionen son los siguientes:
 
 ```javascript
 //SEGURIDAD --------------------------------------
+  
+  //Establecemos las configuraciones de easy-permissions
+  const easy_permissions = require("@codice-progressio/easy-permissions")
+  easy_permissions.config({
+    // Para mejor rendimiento establecer en false
+    generarPermisos: true,
+    // En modo producción no se generan permisos
+    modoProduccion: false,
+  })
 
-//Llamamos la libreria.
-const codice_security = require("@codice-progressio/express-authentication")
-// Definimos el modo debug para este demo
-codice_security.configuraciones.debug = true
-// Usamos la configuracion por defecto de cors, pero
-// siempre la podemos sobreescribir.
-codice_security.configuraciones.cors.origin = process.env.ORIGIN
-//TOKEN
-codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
+  //Llamamos la libreria.
+  const codice_security = require("./index.js")
 
-//  CORREO
-codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
-codice_security.configuraciones.correo.dominio_recuperacion =
-  process.env.CORREO_DOMINIO_RECUPERACION
-codice_security.configuraciones.correo.nombre_aplicacion =
-  process.env.CORREO_NOMBRE_APLICACION
-codice_security.configuraciones.correo.transport.host =
-  process.env.CORREO_TRANSPORT_HOST
-codice_security.configuraciones.correo.transport.port =
-  process.env.CORREO_TRANSPORT_PORT
-codice_security.configuraciones.correo.transport.auth.user =
-  process.env.CORREO_TRANSPORT_AUTH_USER
-codice_security.configuraciones.correo.transport.auth.pass =
-  process.env.CORREO_TRANSPORT_AUTH_PASS
+  // Definimos el modo debugs para este demo
+  codice_security.configuraciones.debug = true
+  // Usamos la configuracion por defecto de cors, pero
+  // siempre la podemos sobreescribir. (TODO: Completar todas las opciones)
+  codice_security.configuraciones.cors.origin = process.env.ORIGIN
+  //TOKEN
+  codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
 
-codice_security.configuraciones.correo.mailOptions.from =
-  process.env.CORREO_MAILOPTIONS_FROM
+  //  CORREO
 
-//Llamamos el metodo basico para que se aplique la configuración de seguridad.
-app.use(codice_security.basico())
+  codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
+  codice_security.configuraciones.correo.dominio_recuperacion =
+    process.env.CORREO_DOMINIO_RECUPERACION
+  codice_security.configuraciones.correo.nombre_aplicacion =
+    process.env.CORREO_NOMBRE_APLICACION
+  codice_security.configuraciones.correo.transport.host =
+    process.env.CORREO_TRANSPORT_HOST
+  codice_security.configuraciones.correo.transport.port =
+    process.env.CORREO_TRANSPORT_PORT
+  codice_security.configuraciones.correo.transport.auth.user =
+    process.env.CORREO_TRANSPORT_AUTH_USER
+  codice_security.configuraciones.correo.transport.auth.pass =
+    process.env.CORREO_TRANSPORT_AUTH_PASS
+
+  codice_security.configuraciones.correo.mailOptions.from =
+    process.env.CORREO_MAILOPTIONS_FROM
+
+  //Llamamos la configuracion de configuracion
+  app.use(codice_security.basico())
+
+  //SEGURIDAD FIN ----------------------------------
+
+  //Disfrutamos de la vida...
 ```
 
 ## Opciones disponibles
@@ -160,8 +175,5 @@ const configuraciones = {
       descripcion: "Permisos de administrador",
     },
   },
-
-  easy_permissions: require("@codice-progressio/easy-permissions")
-    .configuraciones,
 }
 ```
