@@ -10,61 +10,69 @@
 
 ## Uso
 
+> # ¡IMPORTANTE!
+>
+> El código en node es lineal y es ejecutado cuando es llamando. esto incluye las importaciones echas con `require`. Para que `@codice-progressio/easy-permissions` funcione correctamente es necesario llamar a las rutas despues de configurar `easy-permissions` y esta libreria.
+
 Los valores requeridos para que funcionen son los siguientes:
 
 ```javascript
 //SEGURIDAD --------------------------------------
-  
-  //Establecemos las configuraciones de easy-permissions
-  const easy_permissions = require("@codice-progressio/easy-permissions")
-  easy_permissions.config({
-    // Para mejor rendimiento establecer en false
-    generarPermisos: true,
-    // En modo producción no se generan permisos
-    modoProduccion: false,
-  })
 
-  //Llamamos la libreria.
-  const codice_security = require("./index.js")
+//Establecemos las configuraciones de easy-permissions
+const easy_permissions = require("@codice-progressio/easy-permissions")
+easy_permissions.config({
+  // Para mejor rendimiento establecer en false
+  generarPermisos: true,
+  // En modo producción no se generan permisos
+  modoProduccion: false,
+})
 
-  // Definimos el modo debugs para este demo
-  codice_security.configuraciones.debug = true
-  // Usamos la configuracion por defecto de cors, pero
-  // siempre la podemos sobreescribir. (TODO: Completar todas las opciones)
-  codice_security.configuraciones.cors.origin = process.env.ORIGIN
-  //TOKEN
-  codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
+//Llamamos la libreria.
+const codice_security = require("./index.js")
 
-  //  CORREO
+// Definimos el modo debugs para este demo
+codice_security.configuraciones.debug = true
+// Usamos la configuracion por defecto de cors, pero
+// siempre la podemos sobreescribir. (TODO: Completar todas las opciones)
+codice_security.configuraciones.cors.origin = process.env.ORIGIN
+//TOKEN
+codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
 
-  codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
-  codice_security.configuraciones.correo.dominio_recuperacion =
-    process.env.CORREO_DOMINIO_RECUPERACION
-  codice_security.configuraciones.correo.nombre_aplicacion =
-    process.env.CORREO_NOMBRE_APLICACION
-  codice_security.configuraciones.correo.transport.host =
-    process.env.CORREO_TRANSPORT_HOST
-  codice_security.configuraciones.correo.transport.port =
-    process.env.CORREO_TRANSPORT_PORT
-  codice_security.configuraciones.correo.transport.auth.user =
-    process.env.CORREO_TRANSPORT_AUTH_USER
-  codice_security.configuraciones.correo.transport.auth.pass =
-    process.env.CORREO_TRANSPORT_AUTH_PASS
+//  CORREO
 
-  codice_security.configuraciones.correo.mailOptions.from =
-    process.env.CORREO_MAILOPTIONS_FROM
+codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
+codice_security.configuraciones.correo.dominio_recuperacion =
+  process.env.CORREO_DOMINIO_RECUPERACION
+codice_security.configuraciones.correo.nombre_aplicacion =
+  process.env.CORREO_NOMBRE_APLICACION
+codice_security.configuraciones.correo.transport.host =
+  process.env.CORREO_TRANSPORT_HOST
+codice_security.configuraciones.correo.transport.port =
+  process.env.CORREO_TRANSPORT_PORT
+codice_security.configuraciones.correo.transport.auth.user =
+  process.env.CORREO_TRANSPORT_AUTH_USER
+codice_security.configuraciones.correo.transport.auth.pass =
+  process.env.CORREO_TRANSPORT_AUTH_PASS
 
-  //Llamamos la configuracion de configuracion
-  app.use(codice_security.basico())
+codice_security.configuraciones.correo.mailOptions.from =
+  process.env.CORREO_MAILOPTIONS_FROM
 
-  //SEGURIDAD FIN ----------------------------------
+//Llamamos la configuracion de configuracion
+app.use(codice_security.basico())
 
-  //Disfrutamos de la vida...
+//SEGURIDAD FIN ----------------------------------
+
+//Es necesario que se haga de esta manera para no tener problemas con las configuraciones de easy-permissions.
+const routes = require("routes")
+app.use(routes)
+
+//Disfrutamos de la vida...
 ```
 
 ## Opciones disponibles
 
-```json
+```javascript
 const configuraciones = {
   cors: {
     origin: "*",
@@ -175,5 +183,6 @@ const configuraciones = {
       descripcion: "Permisos de administrador",
     },
   },
+  easy_permissions:require("@codice-progressio/easy_permissions")
 }
 ```
