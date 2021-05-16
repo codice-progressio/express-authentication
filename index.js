@@ -1,4 +1,4 @@
-  const app = require("express")()
+const app = require("express")()
 const cors = require("cors")
 const configuraciones = require("./configuraciones")
 const log = require("./utilidades").log
@@ -6,25 +6,20 @@ const jsonwebtoken = require("jsonwebtoken")
 const express_jwt = require("express-jwt")
 const usuarioModel = require("./models/usuario.model")
 
+module.exports.configuraciones = configuraciones
+
 /**
  *
  * Configuracion básica para funcionamiento con cors.
  * @param {*} configuraciones
  * @returns Libreria cors configurada para aplicar a un middleware directamente
  */
-module.exports.basico = function ()
-{
+module.exports.basico = function () {
   // Quitamos el heder x-powered-by:express
-  app.disable('x-powered-by');
+  app.disable("x-powered-by")
 
   // Importa la libreria
-  const easyPermissions = require("@codice-progressio/easy-permissions")
-  // Setea los parametros básicos de configuración
-  easyPermissions.config({
-    modoProduccion: false,
-    generarPermisos: true,
-  })
-
+  const easyPermissions = configuraciones.easy_permissions
   log("easy-permissions: ", easyPermissions.configuraciones)
 
   log("CORS: ", configuraciones.cors)
@@ -71,5 +66,4 @@ module.exports.hash = {
   compare: (password, hash) => require("bcrypt").compare(password, hash),
 }
 
-module.exports.configuraciones = configuraciones
 module.exports.usuarioModel = usuarioModel

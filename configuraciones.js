@@ -111,8 +111,7 @@ const configuraciones = {
     },
   },
 
-  easy_permissions: require("@codice-progressio/easy-permissions")
-    .configuraciones,
+  easy_permissions: require("@codice-progressio/easy-permissions"),
 }
 
 function validaciones(err) {
