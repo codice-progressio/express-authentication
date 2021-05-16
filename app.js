@@ -33,7 +33,6 @@ db.once("open", () => {
 
   //Llamamos la libreria.
   const codice_security = require("./index.js")
-
   // Definimos el modo debugs para este demo
   codice_security.configuraciones.debug = true
   // Usamos la configuracion por defecto de cors, pero

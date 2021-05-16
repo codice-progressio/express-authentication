@@ -686,4 +686,23 @@ module.exports = {
         .catch(_ => next(_))
     },
   },
+
+  read_todos_los_permisos: {
+    metodo: "get",
+    path: "/info/permisos-existentes",
+    pre_middlewares: null,
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res) => {
+      let cEasy = require("@codice-progressio/easy-permissions").configuraciones
+
+      let path =
+        cEasy.path +
+        cEasy.nombreCarpetaPermisos +
+        "/" +
+        cEasy.nombreArchivoPermisos
+      let permisos = require(path)
+
+      res.send({ permisos })
+    },
+  },
 }
