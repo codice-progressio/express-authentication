@@ -12,7 +12,7 @@
 
 > # ¡IMPORTANTE!
 >
-> El código en node es lineal y es ejecutado cuando es llamando. esto incluye las importaciones echas con `require`. Para que `@codice-progressio/easy-permissions` funcione correctamente es necesario llamar a las rutas despues de configurar `easy-permissions` y esta libreria.
+> El código en node es lineal y es ejecutado cuando es llamando. esto incluye las importaciones echas con `require`. Para que `@codice-progressio/easy-permissions` funcione correctamente es necesario llamar a las rutas despues de configurar `easy-permissions` y a esta libreria, de otra manera `easy-permissions` en la funcion de asingacion de permisos `$()` dara el error `path undefined`
 
 Los valores requeridos para que funcionen son los siguientes:
 
