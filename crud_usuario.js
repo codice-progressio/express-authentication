@@ -570,7 +570,7 @@ module.exports = {
     metodo: "put",
     path: "/agregar-permiso",
     pre_middlewares: null,
-    permiso: require("./configuraciones").permisos.administrador,
+    permiso: require("./configuraciones").permisos.agregar_permiso,
     cb: (req, res, next) => {
       let Usuario = require("./models/usuario.model")
 
@@ -600,7 +600,7 @@ module.exports = {
     metodo: "put",
     path: "/eliminar-permiso",
     pre_middlewares: null,
-    permiso: require("./configuraciones").permisos.administrador,
+    permiso: require("./configuraciones").permisos.eliminar_permiso,
     cb: (req, res, next) => {
       let Usuario = require("./models/usuario.model")
 
@@ -647,7 +647,7 @@ module.exports = {
     metodo: "delete",
     path: "/inhabilitar/:id",
     pre_middlewares: null,
-    permiso: require("./configuraciones").permisos.administrador,
+    permiso: require("./configuraciones").permisos.inhabilitar_usuario,
     cb: (req, res, next) => {
       let Usuario = require("./models/usuario.model")
       let id = req.params.id
@@ -669,7 +669,7 @@ module.exports = {
     metodo: "put",
     path: "/habilitar/:id",
     pre_middlewares: null,
-    permiso: require("./configuraciones").permisos.administrador,
+    permiso: require("./configuraciones").permisos.inhabilitar_usuario,
     cb: (req, res, next) => {
       let Usuario = require("./models/usuario.model")
       let id = req.params.id
@@ -691,7 +691,7 @@ module.exports = {
     metodo: "get",
     path: "/info/permisos-existentes",
     pre_middlewares: null,
-    permiso: require("./configuraciones").permisos.administrador,
+    permiso: require("./configuraciones").permisos.agregar_permisos,
     cb: (req, res) => {
       let cEasy = require("@codice-progressio/easy-permissions").configuraciones
 

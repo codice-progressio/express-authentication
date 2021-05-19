@@ -105,6 +105,16 @@ const configuraciones = {
       descripcion: "Crea un nuevo permiso al usuario",
     },
 
+    eliminar_permiso: {
+      permiso: "usuario:modificar:eliminar-permiso",
+      descripcion: "Elimina un permiso del usuario",
+    },
+
+    inhabilitar_usuario: {
+      permiso: "usuario:modificar:inhabilitar",
+      descripcion: "Deshabilita al usuario ",
+    },
+
     administrador: {
       permiso: "administrador",
       descripcion: "Permisos de administrador",
