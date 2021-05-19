@@ -382,7 +382,7 @@ module.exports = {
   create: {
     metodo: "post",
     path: "/",
-    permiso: require("./configuraciones").permisos.crear,
+    permiso: require("./configuraciones").permisos.crear_usuario,
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
       let codice_security = require("./index")
