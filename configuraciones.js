@@ -26,7 +26,7 @@ const configuraciones = {
       registrados.Puede hacer esto usando la opción credentialsRequired:
       */
       credentialsRequired: true,
-      requestProperty: "usuario",
+      requestProperty: "user",
     },
   },
 
