@@ -10,27 +10,23 @@
 
 ## Uso
 
-> # ¡IMPORTANTE!
->
-> El código en node es lineal y es ejecutado cuando es llamando. esto incluye las importaciones echas con `require`. Para que `@codice-progressio/easy-permissions` funcione correctamente es necesario llamar a las rutas despues de configurar `easy-permissions` y a esta libreria, de otra manera `easy-permissions` en la funcion de asingacion de permisos `$()` dara el error `path undefined`
-
 Los valores requeridos para que funcionen son los siguientes:
 
 ```javascript
 //SEGURIDAD --------------------------------------
 
+//Llamamos la libreria.
+const codice_security = require("./index.js")
 //Establecemos las configuraciones de easy-permissions
-const easy_permissions = require("@codice-progressio/easy-permissions")
-easy_permissions.config({
+codice_security.configuraciones.easy_permissions.config({
   // Para mejor rendimiento establecer en false
   generarPermisos: true,
   // En modo producción no se generan permisos
   modoProduccion: false,
+  //Definimos el path para la ruta donde se creara la carpeta
+  // y los ficheros de permisos
+  path: require("path").resolve(__dirname).concat("/"),
 })
-
-//Llamamos la libreria.
-const codice_security = require("./index.js")
-
 // Definimos el modo debugs para este demo
 codice_security.configuraciones.debug = true
 // Usamos la configuracion por defecto de cors, pero
@@ -40,7 +36,6 @@ codice_security.configuraciones.cors.origin = process.env.ORIGIN
 codice_security.configuraciones.jwt.private_key = process.env.PRIVATE_KEY
 
 //  CORREO
-
 codice_security.configuraciones.correo.dominio = process.env.CORREO_DOMINIO
 codice_security.configuraciones.correo.dominio_recuperacion =
   process.env.CORREO_DOMINIO_RECUPERACION
@@ -183,6 +178,6 @@ const configuraciones = {
       descripcion: "Permisos de administrador",
     },
   },
-  easy_permissions:require("@codice-progressio/easy_permissions")
+  easy_permissions: require("@codice-progressio/easy_permissions"),
 }
 ```
