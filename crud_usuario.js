@@ -231,6 +231,43 @@ module.exports = {
     },
   },
 
+  update_permisos_administrador: {
+    metodo: "put",
+    path: "/restaurar-permisos-administrador",
+    pre_middlewares: [bruteforce.prevent],
+    permiso: require("./configuraciones").permisos.administrador,
+    cb: (req, res, next) => {
+      let Usuario = require("./models/usuario.model")
+      let configuraciones = require("./configuraciones")
+      let permisos = configuraciones.permisos
+      let _id = req.body._id
+
+      Usuario.findOne({
+        _id,
+        permissions: permisos.administrador.permiso,
+      })
+        .select(" permissions ")
+
+        .then(usuario => {
+          if (!usuario) throw "No existe el id"
+          let permisosFicheroSeguridad = obtenerTodosLosPermisosEnArrayString()
+
+          while (usuario.permissions.length > 0) usuario.permissions.pop()
+          // Agregamos todos los permisos
+          usuario.permissions.push(...permisosFicheroSeguridad)
+          return usuario.save()
+        })
+
+        .then(usuario =>
+          res.send({
+            mensaje: "Se restauraron los permisos de administrador del usuario",
+            usuario,
+          })
+        )
+        .catch(_ => next(_))
+    },
+  },
+
   login: {
     metodo: "post",
     path: "/login",
@@ -718,7 +755,7 @@ function obtenerTodosLosPermisosEnArrayString() {
   //Obtenemos las configuraciones de easy_permissions desde
   // las configuraciones generales.
   let easy_permissions_configuraciones =
-    require("./configuraciones").easy_permissions.cofiguraciones
+    require("./configuraciones").easy_permissions.configuraciones
 
   // Convertimos cada dato para la construcción de los archivos en
   // variables más cortas.
@@ -732,9 +769,10 @@ function obtenerTodosLosPermisosEnArrayString() {
   // Llamamos al archivo de permisos
   let permisosDeApp = require(rutaDePermisos)
   // Obtenemos las claves
+  console.log(permisosDeApp)
   permisos.push(...Object.keys(permisosDeApp))
   // Si hay repetidos los eliminamos.
-  permisos = Array.from(new Set(permisosDeApp))
+  permisos = Array.from(new Set(permisos))
 
   return permisos
 }
