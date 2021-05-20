@@ -16,23 +16,24 @@ const db = mongoose.connection
 db.on("error", console.error.bind(console, "connection error:"))
 db.once("open", () => {
   console.log("BD en linea")
-  
+
   app.use(express.json({ limit: "5MB" }))
   //Esta configurcion es para poder hacer pruebas de creación.
-  
+
   //SEGURIDAD --------------------------------------
-  
+
+  //Llamamos la libreria.
+  const codice_security = require("./index.js")
   //Establecemos las configuraciones de easy-permissions
-  const easy_permissions = require("@codice-progressio/easy-permissions")
-  easy_permissions.config({
+  codice_security.configuraciones.easy_permissions.config({
     // Para mejor rendimiento establecer en false
     generarPermisos: true,
     // En modo producción no se generan permisos
     modoProduccion: false,
+    //Definimos el path para la ruta donde se creara la carpeta
+    // y los ficheros de permisos
+    path: require("path").resolve(__dirname).concat("/"),
   })
-
-  //Llamamos la libreria.
-  const codice_security = require("./index.js")
   // Definimos el modo debugs para este demo
   codice_security.configuraciones.debug = true
   // Usamos la configuracion por defecto de cors, pero
