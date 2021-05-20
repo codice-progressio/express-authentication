@@ -191,7 +191,8 @@ module.exports = {
     permiso: null,
     cb: async (req, res, next) => {
       let Usuario = require("./models/usuario.model")
-      let permisos = require("./configuraciones").permisos
+      let configuraciones = require("./configuraciones")
+      let permisos = configuraciones.permisos
 
       let administrador = await Usuario.find({
         permissions: permisos.administrador.permiso,
@@ -210,9 +211,7 @@ module.exports = {
           usuario.password = password
 
           // Agregamos todos los permisos al usuario administrador
-          Object.keys(permisos).forEach(x =>
-            usuario.permissions.push(permisos[x].permiso)
-          )
+          usuario.permissions.push(...obtenerTodosLosPermisosEnArrayString())
 
           usuario["email_validado"] = {
             codigo: generarCodigoDeActivacion_Recuperacion(),
@@ -231,6 +230,7 @@ module.exports = {
         .catch(_ => next(_))
     },
   },
+
   login: {
     metodo: "post",
     path: "/login",
@@ -705,4 +705,36 @@ module.exports = {
       res.send({ permisos })
     },
   },
+}
+
+/**
+ *Obtenemos todos los permisos existentes creados actualmente.
+ *
+ * @returns
+ */
+function obtenerTodosLosPermisosEnArrayString() {
+  let permisos = []
+
+  //Obtenemos las configuraciones de easy_permissions desde
+  // las configuraciones generales.
+  let easy_permissions_configuraciones =
+    require("./configuraciones").easy_permissions.cofiguraciones
+
+  // Convertimos cada dato para la construcción de los archivos en
+  // variables más cortas.
+  let path = easy_permissions_configuraciones.path
+  let nombreCarpetaPermisos =
+    easy_permissions_configuraciones.nombreCarpetaPermisos
+  let nombreArchivoPermisos =
+    easy_permissions_configuraciones.nombreArchivoPermisos
+  // Recreamos la ruta completa
+  let rutaDePermisos = `${path}${nombreCarpetaPermisos}/${nombreArchivoPermisos}`
+  // Llamamos al archivo de permisos
+  let permisosDeApp = require(rutaDePermisos)
+  // Obtenemos las claves
+  permisos.push(...Object.keys(permisosDeApp))
+  // Si hay repetidos los eliminamos.
+  permisos = Array.from(new Set(permisosDeApp))
+
+  return permisos
 }
