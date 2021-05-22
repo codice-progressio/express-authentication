@@ -552,7 +552,7 @@ module.exports = {
   },
 
   update_recuperar_password_email: {
-    metodo: "get",
+    metodo: "post",
     path: "/recuperar-password-email",
     pre_middlewares: [bruteforce.prevent],
     permiso: null,
