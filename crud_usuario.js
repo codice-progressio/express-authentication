@@ -72,7 +72,7 @@ function enviarCorreoConfirmacionUsuario(us) {
 function enviarCorreoRecuperacionContrasena(usuario) {
   const configuraciones = require("./configuraciones")
   let html = require("./plantillas.email").correo_recuperacion_password({
-    link_confirmacion: configuraciones.correo.dominio + "/usuario/confirmar",
+    link_confirmacion: configuraciones.correo.dominio_recuperacion,
     codigo: usuario.email_validado.codigo + usuario._id,
     nombre: usuario.nombre,
     nombre_aplicacion: configuraciones.correo.nombre_aplicacion,

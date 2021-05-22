@@ -669,48 +669,18 @@ a.badge-dark:hover {color:#fff !important;background-color:#1d2124 !important
 <tr>
   <td style="line-height: 24px; font-size: 16px; margin: 0; border-spacing: 0px; border-collapse: collapse; padding: 12px 20px; width: 100%;" width="100%">
     <div class="" data-bte-removed-class="card-body">
-        <h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">${datos.nombre_aplicacion}</h1>
+        <h1 class="text-muted" style="margin-top: 0; margin-bottom: 0; font-weight: 400; text-align: left; vertical-align: baseline; font-size: 36px; line-height: 46.8px; color: #636c72;">CODICE SECURITY</h1>
         <h5 style="margin-top: 0; margin-bottom: 0; font-weight: 400; color: inherit; text-align: left; vertical-align: baseline; font-size: 20px; line-height: 26px;">
           ¡Hola ${datos.nombre}!, hemos recibido una solicitud para restaurar
           tu contraseña en ${datos.nombre_aplicacion}
         </h5>
         <br>
-
-        <table data-bte-added-class="btn btn-primary" class="btn btn-primary" border="0" cellpadding="0" cellspacing="0" style="font-family: Helvetica,Arial,sans-serif; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0px; border-radius: 4px; border-collapse: separate;">
-<tbody>
-<tr>
-  <td style="margin: 0; border-spacing: 0px; border-collapse: collapse; display: inline-block; font-weight: 400; line-height: 1.5; text-align: center; vertical-align: middle; cursor: pointer; user-select: none; border: 1px solid transparent; padding: 6px 12px; font-size: 16px; border-radius: 4px; transition: color 0.15s ease-in-out,background-color 0.15s ease-in-out,border-color 0.15s ease-in-out,box-shadow 0.15s ease-in-out; color: #fff; background-color: #007bff; border-color: #007bff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15),0 1px 1px rgba(0,0,0,0.075);" align="center" valign="middle" bgcolor="#007bff">
-    <a class="" href="${datos.link_confirmacion}?codigo=${datos.codigo}" data-bte-removed-class="btn btn-primary" style="background-color: transparent; text-decoration: none; color: #fff;">Restaurar contraseña</a>
-  </td>
-</tr>
-</tbody>
-</table>
-
-        <br>
-        <!-- HR TEMPLATE -->
-<table class="hr" border="0" cellpadding="0" cellspacing="0" style="font-family: Helvetica,Arial,sans-serif; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0px; border-collapse: collapse; width: 100%; border: 0;" width="100%">
-<tbody>
-<tr>
-  <td style="line-height: 24px; font-size: 16px; margin: 0; border-spacing: 0px; border-collapse: collapse; width: 100%; padding: 16px 0;" width="100%">
-    <table border="0" cellpadding="0" cellspacing="0" style="font-family: Helvetica,Arial,sans-serif; mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-spacing: 0px; border-collapse: collapse; width: 100%;" width="100%">
-      <tbody>
-      <tr>
-        <td style="margin: 0; border-spacing: 0px; border-collapse: collapse; border-top: 1px solid #adb5bd; height: 1px; width: 100%; font-size: 0; line-height: 0;" width="100%" height="1">&nbsp;</td>
-      </tr>
-      </tbody>
-    </table>
-  </td>
-</tr>
-</tbody>
-</table>
-<!-- / HR TEMPLATE -->
-
-        <p class="text-muted" style="line-height: 24px; font-size: 16px; margin: 0; width: 100%; color: #636c72;">
-          Si el enlace no funciona, copia y pega el siguiente link en tu
-          navegador:
-        </p>
         ${datos.link_confirmacion}?codigo=${datos.codigo}
         <br>
+        <p class="text-muted" style="line-height: 24px; font-size: 16px; margin: 0; width: 100%; color: #636c72;">
+          Si el link no funciona, copia y pega el link en tu
+          navegador:
+        </p>
       </div>
   </td>
 </tr>
