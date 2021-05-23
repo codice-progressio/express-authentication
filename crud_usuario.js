@@ -359,6 +359,7 @@ module.exports = {
 
       let Usuario = require("./models/usuario.model")
       Usuario.findById(req.params.id)
+      .select("+permissions")
         .exec()
         .then(usuario => res.send({ usuario }))
         .catch(_ => next(_))
