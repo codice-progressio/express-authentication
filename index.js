@@ -67,3 +67,6 @@ module.exports.hash = {
 }
 
 module.exports.usuarioModel = usuarioModel
+
+
+module.exports.utilidades = require("./utilidades")

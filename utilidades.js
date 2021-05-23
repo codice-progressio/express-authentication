@@ -28,6 +28,11 @@ module.exports.emoticones = {
   },
 }
 
+/**
+ * Permite enviar un correo
+ * @param {*} mailOptions 
+ * @returns 
+ */
 module.exports.correo = (
   mailOptions = {
     from: "",
@@ -40,3 +45,29 @@ module.exports.correo = (
   var transport = nodemailer.createTransport(configuraciones.correo.transport)
   return transport.sendMail(mailOptions)
 }
+
+
+/**
+ *Comprueba que si el usuario es administrador, o el mismo que esta
+ * logueado.
+ *
+ * @param {*} req
+ * @returns
+ */
+module.exports.comprobarAdministradorMismoUsuario=function (req) {
+  //Solo el mismo usuario se puede modificar estos datos
+  // o si es administrador puede cambiar el de cualquiera
+  const config = require("./configuraciones")
+  // 1.- Saber si es administrador
+  let usuarioLogueado = req[config.jwt.decode.requestProperty]
+  let esAdministrador = usuarioLogueado.permissions.includes("administrador")
+
+  if (!esAdministrador) {
+    //2.- No es administrador, es mismo usuario?
+    let esMismoUsuario = usuarioLogueado._id === req.params.id
+    if (!esMismoUsuario) return false
+  }
+
+  return true
+}
+

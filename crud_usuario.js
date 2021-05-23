@@ -31,20 +31,7 @@ const bruteforce = new ExpressBrute(store, {
 const msjError_codigo_no_valido = "El código no es valido"
 
 function comprobarAdministradorMismoUsuario(req) {
-  //Solo el mismo usuario se puede modificar estos datos
-  // o si es administrador puede cambiar el de cualquiera
-  const config = require("./configuraciones")
-  // 1.- Saber si es administrador
-  let usuarioLogueado = req[config.jwt.decode.requestProperty]
-  let esAdministrador = usuarioLogueado.permissions.includes("administrador")
-
-  if (!esAdministrador) {
-    //2.- No es administrador, es mismo usuario?
-    let esMismoUsuario = usuarioLogueado._id === req.params.id
-    if (!esMismoUsuario) return false
-  }
-
-  return true
+  return require("./utilidades").comprobarAdministradorMismoUsuario(req)
 }
 
 function enviarCorreoConfirmacionUsuario(us) {
@@ -359,7 +346,7 @@ module.exports = {
 
       let Usuario = require("./models/usuario.model")
       Usuario.findById(req.params.id)
-      .select("+permissions")
+        .select("+permissions")
         .exec()
         .then(usuario => res.send({ usuario }))
         .catch(_ => next(_))
