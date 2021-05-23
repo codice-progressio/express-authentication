@@ -49,6 +49,7 @@ function comprobarAdministradorMismoUsuario(req) {
 
 function enviarCorreoConfirmacionUsuario(us) {
   const configuraciones = require("./configuraciones")
+  if (!us._id) throw "No se recibio el id del usuario"
   let html = require("./plantillas.email").correo_confirmacion({
     correo: us.email,
     link_confirmacion: configuraciones.correo.dominio + "/usuario/confirmar",
@@ -71,6 +72,7 @@ function enviarCorreoConfirmacionUsuario(us) {
 
 function enviarCorreoRecuperacionContrasena(usuario) {
   const configuraciones = require("./configuraciones")
+  if (!usuario._id) throw "No se recibio el id del usuario"
   let html = require("./plantillas.email").correo_recuperacion_password({
     link_confirmacion: configuraciones.correo.dominio_recuperacion,
     codigo: usuario.email_validado.codigo + usuario._id,
@@ -301,11 +303,9 @@ module.exports = {
           delete usuarioBD.password
           delete usuarioBD.email_validado
           //Firmamos un token
-          console.log(usuarioBD)
           return codice_security.token.generar(usuarioBD)
         })
         .then(token => {
-          console.log(token)
           res.send({ token })
         })
         .catch(err => next(err))
@@ -769,7 +769,6 @@ function obtenerTodosLosPermisosEnArrayString() {
   // Llamamos al archivo de permisos
   let permisosDeApp = require(rutaDePermisos)
   // Obtenemos las claves
-  console.log(permisosDeApp)
   permisos.push(...Object.keys(permisosDeApp))
   // Si hay repetidos los eliminamos.
   permisos = Array.from(new Set(permisos))
