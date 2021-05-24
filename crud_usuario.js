@@ -621,14 +621,15 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.agregar_permiso,
     cb: (req, res, next) => {
-      let Usuario = require("mongoose").model(
-        require("./configuraciones").usuario.nombre_bd
-      )
+      let configuraciones = require("./configuraciones")
+      let Usuario = require("mongoose").model(configuraciones.usuario.nombre_bd)
 
       let permiso = req.body.permiso
       if (!permiso) return next("No se recibio ningún permiso")
       // El permiso debe existir en la lista.
-      let permisos = Object.keys(require("./seguridad/permisos.seguridad"))
+      let permisos = Object.keys(
+        require(configuraciones.easy_permissions_path.fichero_permiso_permiso)
+      )
       if (!permisos.includes(permiso))
         return next("El permiso enviado no es válido")
 
