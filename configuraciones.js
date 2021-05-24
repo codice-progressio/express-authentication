@@ -122,6 +122,18 @@ const configuraciones = {
   },
 
   easy_permissions: require("@codice-progressio/easy-permissions"),
+  easy_permissions_path: {
+    fichero_permiso_descripcion: () => obtenerPathFicheroPermisos(""),
+    fichero_permiso_permiso: () => obtenerPathFicheroPermisos("_"),
+  },
+}
+
+function obtenerPathFicheroPermisos(n) {
+  let config = configuraciones.easy_permissions.configuraciones
+  let path = config.path
+  let carpeta = config.nombreCarpetaPermisos
+  let archivo = n + config.nombreArchivoPermisos
+  return `${path}/${carpeta}/${archivo}`
 }
 
 function validaciones(err) {
