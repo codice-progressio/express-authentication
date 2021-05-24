@@ -7,6 +7,8 @@ const express_jwt = require("express-jwt")
 
 module.exports.configuraciones = configuraciones
 
+let usuarioModel = null
+
 function generarModeloDeUsuario() {
   const mongoose = require("mongoose")
   const uniqueValidator = require("mongoose-unique-validator")
@@ -16,7 +18,10 @@ function generarModeloDeUsuario() {
   usuarioSchema.plugin(uniqueValidator, {
     message: " El email ya esta registrado.",
   })
-  mongoose.model(configuraciones.usuario.nombre_bd, usuarioSchema)
+  usuarioModel = mongoose.model(
+    configuraciones.usuario.nombre_bd,
+    usuarioSchema
+  )
 }
 
 /**
@@ -79,8 +84,6 @@ module.exports.hash = {
   compare: (password, hash) => require("bcrypt").compare(password, hash),
 }
 
-module.exports.usuarioModel = require("mongoose").model(
-  configuraciones.usuario.nombre_bd
-)
+module.exports.usuarioModel = usuarioModel
 
 module.exports.utilidades = require("./utilidades")
