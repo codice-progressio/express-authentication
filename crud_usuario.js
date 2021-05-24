@@ -94,7 +94,9 @@ async function comprobarIntentos(
 
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
-    const Usuario = require("./models/usuario.model")
+    const Usuario = require("mongoose").model(
+      require("./configuraciones").usuario.nombre_bd
+    )
     async function reiniciarContadores() {
       try {
         // Reiniciamos los contadores.
@@ -179,7 +181,9 @@ module.exports = {
     // No requiere permiso
     permiso: null,
     cb: async (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       let configuraciones = require("./configuraciones")
       let permisos = configuraciones.permisos
 
@@ -226,7 +230,9 @@ module.exports = {
     pre_middlewares: [bruteforce.prevent],
     permiso: require("./configuraciones").permisos.administrador,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       let configuraciones = require("./configuraciones")
       let permisos = configuraciones.permisos
       let _id = req.body._id
@@ -270,7 +276,9 @@ module.exports = {
 
       let usuarioBD = null
       // El usuario debe existir.
-      const Usuario = require("./models/usuario.model")
+      const Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       Usuario.findOne({ email })
         .select("+password +permissions +email_validado")
         .lean()
@@ -318,7 +326,9 @@ module.exports = {
         })
       }
 
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       try {
         let usuarios = await Usuario.find(busqueda)
           .limit(limit)
@@ -344,7 +354,9 @@ module.exports = {
       if (!paso)
         throw next({ error: "No puedes leer los datos de otro usuario" })
 
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       Usuario.findById(req.params.id)
         .select("+permissions")
         .exec()
@@ -368,7 +380,9 @@ module.exports = {
       // Y despues debe incluir el id del usuario.
       const _id = codigoCompleto.slice(6)
 
-      const Usuario = require("./models/usuario.model")
+      const Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       // Comprobamos que el usuario este esperando un codigo de
       // de confirmacion.
       Usuario.findById(_id)
@@ -409,7 +423,9 @@ module.exports = {
     path: "/",
     permiso: require("./configuraciones").permisos.crear_usuario,
     cb: async (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       let codice_security = require("./index")
       let us = null
 
@@ -454,7 +470,9 @@ module.exports = {
       if (!puedeModificar)
         throw next({ error: "No puedes modificar a otro usuario" })
 
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let id = req.params.id
       let usuario = await Usuario.findById(id).select("nombre email").exec()
@@ -482,7 +500,9 @@ module.exports = {
       if (!puedeModificar)
         throw next({ error: "No puedes modificar el password de otro usuario" })
 
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let id = req.params.id
       let usuario = await Usuario.findById(id).select("password").exec()
@@ -507,7 +527,9 @@ module.exports = {
     pre_middlewares: [bruteforce.prevent],
     permisos: null,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       if (!req?.query?.email) return next("Es necesario el correo")
 
@@ -548,7 +570,9 @@ module.exports = {
       //Debemos obtener el password nuevo
       let password = req.body?.password
       if (!password) throw next("No definiste el password")
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let codigoCompleto = req.body.codigo
       // El código es de 6 digitos.
@@ -597,7 +621,9 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.agregar_permiso,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let permiso = req.body.permiso
       if (!permiso) return next("No se recibio ningún permiso")
@@ -627,7 +653,9 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.eliminar_permiso,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let permiso = req.body.permiso
       if (!permiso) return next("No se recibio ningún permiso")
@@ -652,7 +680,9 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.administrador,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
 
       let id = req.params.id
 
@@ -674,7 +704,9 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.inhabilitar_usuario,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       let id = req.params.id
       Usuario.findById(id)
         .select("inhabilitado")
@@ -696,7 +728,9 @@ module.exports = {
     pre_middlewares: null,
     permiso: require("./configuraciones").permisos.inhabilitar_usuario,
     cb: (req, res, next) => {
-      let Usuario = require("./models/usuario.model")
+      let Usuario = require("mongoose").model(
+        require("./configuraciones").usuario.nombre_bd
+      )
       let id = req.params.id
       Usuario.findById(id)
         .select("inhabilitado")

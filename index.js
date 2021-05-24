@@ -4,9 +4,20 @@ const configuraciones = require("./configuraciones")
 const log = require("./utilidades").log
 const jsonwebtoken = require("jsonwebtoken")
 const express_jwt = require("express-jwt")
-const usuarioModel = require("./models/usuario.model")
 
 module.exports.configuraciones = configuraciones
+
+function generarModeloDeUsuario() {
+  const mongoose = require("mongoose")
+  const uniqueValidator = require("mongoose-unique-validator")
+  const Schema = mongoose.Schema
+  const usuarioSchema = new Schema(configuraciones.usuario.schema)
+
+  usuarioSchema.plugin(uniqueValidator, {
+    message: " El email ya esta registrado.",
+  })
+  mongoose.model(configuraciones.usuario.nombre_bd, usuarioSchema)
+}
 
 /**
  *
@@ -41,6 +52,8 @@ module.exports.basico = function () {
   log("Cargando rutas de usuario")
   app.use("/usuario", require("./routes/usuario.routes"))
 
+  generarModeloDeUsuario()
+
   return app
 }
 
@@ -66,7 +79,8 @@ module.exports.hash = {
   compare: (password, hash) => require("bcrypt").compare(password, hash),
 }
 
-module.exports.usuarioModel = usuarioModel
-
+module.exports.usuarioModel = require("mongoose").model(
+  configuraciones.usuario.nombre_bd
+)
 
 module.exports.utilidades = require("./utilidades")
