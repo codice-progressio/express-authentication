@@ -628,7 +628,7 @@ module.exports = {
       if (!permiso) return next("No se recibio ningún permiso")
       // El permiso debe existir en la lista.
       let permisos = Object.keys(
-        require(configuraciones.easy_permissions_path.fichero_permiso_permiso)
+        require(configuraciones.easy_permissions_path.fichero_permiso_permiso())
       )
       if (!permisos.includes(permiso))
         return next("El permiso enviado no es válido")
