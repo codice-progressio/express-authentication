@@ -7,13 +7,10 @@ const express_jwt = require("express-jwt")
 
 module.exports.configuraciones = configuraciones
 
-let usuarioModel = null
-
-function generarModeloDeUsuario() {
+function generarModeloDeUsuario(schema) {
   const mongoose = require("mongoose")
   const uniqueValidator = require("mongoose-unique-validator")
-  const Schema = mongoose.Schema
-  const usuarioSchema = new Schema(configuraciones.usuario.schema)
+  let usuarioSchema = schema ?? new Schema(configuraciones.usuario.schema)
 
   usuarioSchema.plugin(uniqueValidator, {
     message: " El email ya esta registrado.",
@@ -27,10 +24,13 @@ function generarModeloDeUsuario() {
 /**
  *
  * Configuracion básica para funcionamiento con cors.
- * @param {*} configuraciones
+ * @param {*} schema Si este parametro se deja en nulo, se creara 
+ * automaticamente. Para tener control sobre los hooks se debe de pasar el 
+ * schema creado
+ * @returns
  * @returns Libreria cors configurada para aplicar a un middleware directamente
  */
-module.exports.basico = function () {
+module.exports.basico = function (schema) {
   // Quitamos el heder x-powered-by:express
   app.disable("x-powered-by")
 
@@ -57,7 +57,7 @@ module.exports.basico = function () {
   log("Cargando rutas de usuario")
   app.use("/usuario", require("./routes/usuario.routes"))
 
-  generarModeloDeUsuario()
+  generarModeloDeUsuario(schema)
 
   return app
 }

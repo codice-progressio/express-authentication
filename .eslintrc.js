@@ -1,7 +1,7 @@
 module.exports = {
+  esversion:11,
   env: {
     commonjs: true,
-    es6: true,
     node: true,
   },
   extends: "eslint:recommended",
@@ -12,5 +12,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
-  rules: {},
+  rules: {
+    semi: ["error", "never"]
+  },
 }
