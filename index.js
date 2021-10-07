@@ -10,6 +10,7 @@ module.exports.configuraciones = configuraciones
 function generarModeloDeUsuario(schema) {
   const mongoose = require("mongoose")
   const uniqueValidator = require("mongoose-unique-validator")
+  const Schema = mongoose.Schema
   let usuarioSchema = schema ?? new Schema(configuraciones.usuario.schema)
 
   usuarioSchema.plugin(uniqueValidator, {
