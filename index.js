@@ -6,6 +6,7 @@ const jsonwebtoken = require("jsonwebtoken")
 const express_jwt = require("express-jwt")
 
 module.exports.configuraciones = configuraciones
+let usuarioModel = null
 
 function generarModeloDeUsuario(schema) {
   const mongoose = require("mongoose")
