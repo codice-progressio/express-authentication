@@ -247,7 +247,7 @@ module.exports = {
           if (!usuario) throw "No existe el id"
           let permisosFicheroSeguridad = obtenerTodosLosPermisosEnArrayString()
 
-          while (usuario.permissions.length > 0) usuario.permissions.pop()
+          while (usuario.permissions?.length > 0) usuario.permissions.pop()
           // Agregamos todos los permisos
           usuario.permissions.push(...permisosFicheroSeguridad)
           return usuario.save()
