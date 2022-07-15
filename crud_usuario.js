@@ -538,9 +538,9 @@ module.exports = {
         .exec()
         .then(async usuario => {
           //Debe estar validado
+          if (!usuario) return
           if (!usuario?.email_validado?.validado)
             return next("Usuario no validado")
-          if (!usuario) return
           // no retornamos naa
           else {
             // Modificamos al usuario
