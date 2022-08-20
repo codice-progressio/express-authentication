@@ -19,13 +19,12 @@
     "@babel/core": "^7.14.0",
     "@babel/eslint-parser": "^7.13.14",
     "eslint": "^7.25.0",
-    "nodemon": "^2.0.7",
-    "mongoose": "^5.12.5"
+    "mongoose": "^6.5.2",
+    "nodemon": "^2.0.7"
   },
   "dependencies": {
     "@codice-progressio/easy-permissions": "^0.2.1",
-    "@codice-progressio/express-brute": "^2.0.0",
-    "@codice-progressio/express-brute-mongoose": "^2.0.0",
+    "@codice-progressio/express-brute": "^3.0.0",
     "bcrypt": "^5.0.1",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
@@ -34,15 +33,15 @@
     "express-jwt": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "luxon": "^1.26.0",
-    "mongoose-unique-validator": "^2.0.3",
+    "mongoose-unique-validator": "^3.1.0",
     "nodemailer": "^6.5.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": "14.x.x",
-    "npm": "6.x.x"
+    "node": "16.x.x",
+    "npm": "8.x.x"
   },
   "repository": {
     "type": "git",
