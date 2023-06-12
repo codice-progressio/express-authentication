@@ -39,7 +39,7 @@ function enviarCorreoConfirmacionUsuario(us) {
   if (!us._id) throw "No se recibio el id del usuario"
   let html = require("./plantillas.email").correo_confirmacion({
     correo: us.email,
-    link_confirmacion: configuraciones.correo.dominio + "/usuario/confirmar",
+    link_confirmacion: `${configuraciones.correo.dominio}/${configuraciones.ruta_usuario}/confirmar`,
     codigo: us.email_validado.codigo + us._id,
     nombre: us.nombre,
     nombre_aplicacion: configuraciones.correo.nombre_aplicacion,

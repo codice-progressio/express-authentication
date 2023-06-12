@@ -57,7 +57,7 @@ module.exports.basico = function (schema) {
   )
 
   log("Cargando rutas de usuario")
-  app.use("/usuario", require("./routes/usuario.routes"))
+  app.use(configuraciones.ruta_usuario, require("./routes/usuario.routes"))
 
   generarModeloDeUsuario(schema)
 

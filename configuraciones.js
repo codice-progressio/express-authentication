@@ -1,6 +1,7 @@
 const colores = require("colors")
 
 const configuraciones = {
+  ruta_usuario: '/usuario',
   cors: {
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -14,12 +15,12 @@ const configuraciones = {
     expiresIn: 3600,
     decode: {
       unless: [
-        "/usuario/login",
-        "/usuario/crear-administrador",
-        "/usuario/confirmar",
-        "/usuario/recuperar-password-email",
-        "/usuario/generar-link-recuperar-password",
-      ],
+        "/login",
+        "/crear-administrador",
+        "/confirmar",
+        "/recuperar-password-email",
+        "/generar-link-recuperar-password",
+      ].map(path=> this.ruta_usuario+path),
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
       registrados y, al mismo tiempo, brindar acceso a los usuarios no 

@@ -69,6 +69,11 @@ app.use(routes)
 
 ```javascript
 const configuraciones = {
+  /** 
+   * La ruta para acceder a los endpoint de los 
+   * usuarios. 
+  */
+  ruta_usuario: '/usuario',
   cors: {
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -82,19 +87,19 @@ const configuraciones = {
     expiresIn: 3600,
     decode: {
       unless: [
-        "/usuario/login",
-        "/usuario/crear-administrador",
-        "/usuario/confirmar",
-        "/usuario/recuperar-password-email",
-        "/usuario/generar-link-recuperar-password",
-      ],
+        "/login",
+        "/crear-administrador",
+        "/confirmar",
+        "/recuperar-password-email",
+        "/generar-link-recuperar-password",
+      ].map(path=> this.ruta_usuario+path),
       /*
-      Es posible que desee utilizar este módulo para identificar a los usuarios
-      registrados y, al mismo tiempo, brindar acceso a los usuarios no
+      Es posible que desee utilizar este módulo para identificar a los usuarios 
+      registrados y, al mismo tiempo, brindar acceso a los usuarios no 
       registrados.Puede hacer esto usando la opción credentialsRequired:
       */
       credentialsRequired: true,
-      requestProperty: "usuario",
+      requestProperty: "user",
     },
   },
 
@@ -173,11 +178,26 @@ const configuraciones = {
       descripcion: "Crea un nuevo permiso al usuario",
     },
 
+    eliminar_permiso: {
+      permiso: "usuario:modificar:eliminar-permiso",
+      descripcion: "Elimina un permiso del usuario",
+    },
+
+    inhabilitar_usuario: {
+      permiso: "usuario:modificar:inhabilitar",
+      descripcion: "Deshabilita al usuario ",
+    },
+
     administrador: {
       permiso: "administrador",
       descripcion: "Permisos de administrador",
     },
   },
-  easy_permissions: require("@codice-progressio/easy_permissions"),
+
+  easy_permissions: require("@codice-progressio/easy-permissions"),
+  easy_permissions_path: {
+    fichero_permiso_descripcion: () => obtenerPathFicheroPermisos(""),
+    fichero_permiso_permiso: () => obtenerPathFicheroPermisos("_"),
+  },
 }
 ```
