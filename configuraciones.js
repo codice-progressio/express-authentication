@@ -1,15 +1,7 @@
 const colores = require("colors")
 
 const configuraciones = {
-  _ruta_usuario: '/usuario',
-  get ruta_usuario()
-  {
-    return this._ruta_usuario;
-  },
-  set ruta_usuario(value)
-  {
-    this._ruta_usuario = value;
-  },
+  ruta_usuario: '/usuario',
   cors: {
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
