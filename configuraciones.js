@@ -1,6 +1,13 @@
 const colores = require("colors");
 
 let _RUTA_USUARIO = "/usuario";
+let _UNLESS = [
+  "/login",
+  "/crear-administrador",
+  "/confirmar",
+  "/recuperar-password-email",
+  "/generar-link-recuperar-password",
+]
 
 const configuraciones = {
   ruta_usuario: (ruta) => {
@@ -19,16 +26,14 @@ const configuraciones = {
     //Expresado en segundos
     expiresIn: 3600,
     decode: {
-      unless: (nuevos_valores) =>{
-        const a = [
-          "/login",
-          "/crear-administrador",
-          "/confirmar",
-          "/recuperar-password-email",
-          "/generar-link-recuperar-password",
-        ]
-        a.push(...nuevos_valores) 
-        return a.map((path) => _RUTA_USUARIO + path);
+      _unless: _UNLESS,
+      get unless()
+      {
+        return this._unless.map(p=> _RUTA_USUARIO + p)
+      },
+      set unless(value)
+      {
+        this._unless = value;
       },
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
