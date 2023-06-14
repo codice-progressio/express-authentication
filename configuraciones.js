@@ -1,19 +1,7 @@
 const colores = require("colors");
 
-let _RUTA_USUARIO = "/usuario";
-let _UNLESS = [
-  "/login",
-  "/crear-administrador",
-  "/confirmar",
-  "/recuperar-password-email",
-  "/generar-link-recuperar-password",
-]
-
 const configuraciones = {
-  ruta_usuario: (ruta) => {
-    if (ruta) _RUTA_USUARIO = ruta;
-    return _RUTA_USUARIO;
-  },
+  ruta_usuario: "/usuario",
   cors: {
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -26,15 +14,13 @@ const configuraciones = {
     //Expresado en segundos
     expiresIn: 3600,
     decode: {
-      _unless: _UNLESS,
-      get unless()
-      {
-        return this._unless.map(p=> _RUTA_USUARIO + p)
-      },
-      set unless(value)
-      {
-        this._unless = value;
-      },
+      unless:[
+        "/usuario/login",
+        "/usuario/crear-administrador",
+        "/usuario/confirmar",
+        "/usuario/recuperar-password-email",
+        "/usuario/generar-link-recuperar-password",
+      ],
       /*
       Es posible que desee utilizar este módulo para identificar a los usuarios 
       registrados y, al mismo tiempo, brindar acceso a los usuarios no 
