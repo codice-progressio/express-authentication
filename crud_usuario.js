@@ -1,7 +1,7 @@
 const ExpressBrute = require("@codice-progressio/express-brute")
 const MongooseStore = require("@codice-progressio/express-brute-mongoose")
 const BruteForceSchema = require("@codice-progressio/express-brute-mongoose/dist/schema")
-const mongoose = require("mongoose")
+const mongoose = require("./configuraciones").mongoose
 
 const model = mongoose.model(
   "bruteforce",
@@ -267,43 +267,47 @@ module.exports = {
     metodo: "post",
     path: "/login",
     permiso: null,
-    pre_middlewares: [bruteforce.prevent],
+    // pre_middlewares: [bruteforce.prevent],
     cb: (req, res, next) => {
+
       const password = req.body?.password
       const email = req.body?.email
       const credencialesError = "Credenciales incorrectas"
       const codice_security = require("./index")
-
+      
       let usuarioBD = null
       // El usuario debe existir.
-      const Usuario = require("mongoose").model(
-        require("./configuraciones").usuario.nombre_bd
-      )
-      Usuario.findOne({ email })
+      const Usuario = require("./configuraciones").usuario.modelo 
+        Usuario.findOne({ email })
         .select("+password +permissions +email_validado")
         .lean()
         .exec()
         .then(usuario => {
-          if (!usuario) throw credencialesError
-          usuarioBD = usuario
-          //Debe estaer validado para hacer login
-          if (!usuario.email_validado.validado)
-            throw "El usuario no ha sido validado"
-          if (usuario.inhabilitado) throw "El usuario está inhabilitado"
-          // Comprobamos el password
-          return codice_security.hash.compare(password, usuario.password)
-        })
-        .then(passwordCorrecto => {
-          if (!passwordCorrecto) throw credencialesError
-          delete usuarioBD.password
-          delete usuarioBD.email_validado
-          //Firmamos un token
-          return codice_security.token.generar(usuarioBD)
-        })
-        .then(token => {
-          res.send({ token })
-        })
-        .catch(err => next(err))
+            if (!usuario) throw credencialesError
+            usuarioBD = usuario
+            //Debe estaer validado para hacer login
+            if (!usuario.email_validado.validado)
+              throw "El usuario no ha sido validado"
+            if (usuario.inhabilitado) throw "El usuario está inhabilitado"
+            // Comprobamos el password
+            return codice_security.hash.compare(password, usuario.password)
+          })
+          .then(passwordCorrecto => {
+            if (!passwordCorrecto) throw credencialesError
+            delete usuarioBD.password
+            delete usuarioBD.email_validado
+            //Firmamos un token
+            return codice_security.token.generar(usuarioBD)
+          })
+          .then(token => {
+            res.send({ token })
+          })
+          .catch(err =>       
+            {
+              console.log(err);
+              return next(err);
+            }
+          )
     },
   },
 

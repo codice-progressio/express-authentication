@@ -23,8 +23,9 @@
     "nodemon": "^2.0.7"
   },
   "dependencies": {
-    "@codice-progressio/easy-permissions": "^0.2.1",
-    "@codice-progressio/express-brute": "^3.0.0",
+    "@codice-progressio/easy-permissions": "file:../easy-permissions",
+    "@codice-progressio/express-brute": "file:../express-brute",
+    "@codice-progressio/express-brute-mongoose": "file:../express-brute-mongoose",
     "bcrypt": "^5.0.1",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
@@ -40,8 +41,8 @@
     "access": "public"
   },
   "engines": {
-    "node": "16.x.x",
-    "npm": "8.x.x"
+    "node": "20.x.x",
+    "npm": "10.x.x"
   },
   "repository": {
     "type": "git",

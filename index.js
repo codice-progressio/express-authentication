@@ -9,7 +9,10 @@ module.exports.configuraciones = configuraciones
 let usuarioModel = null
 
 function generarModeloDeUsuario(schema) {
-  const mongoose = require("mongoose")
+
+  log('[EXPRESS - AUTHENTICATION ]', 'Generando modelo de usuario')
+
+  const mongoose = configuraciones.mongoose
   const uniqueValidator = require("mongoose-unique-validator")
   const Schema = mongoose.Schema
   let usuarioSchema = schema ?? new Schema(configuraciones.usuario.schema)
@@ -21,6 +24,7 @@ function generarModeloDeUsuario(schema) {
     configuraciones.usuario.nombre_bd,
     usuarioSchema
   )
+  configuraciones.usuario.modelo = usuarioModel
 }
 
 /**
@@ -33,16 +37,18 @@ function generarModeloDeUsuario(schema) {
  * @returns Libreria cors configurada para aplicar a un middleware directamente
  */
 module.exports.basico = function (schema) {
+
+  generarModeloDeUsuario(schema)
   // Quitamos el heder x-powered-by:express
   app.disable("x-powered-by")
-
+  
   // Importa la libreria
   const easyPermissions = configuraciones.easy_permissions
   log("easy-permissions: ", easyPermissions.configuraciones)
-
+  
   log("CORS: ", configuraciones.cors)
   app.use(cors(configuraciones.cors))
-
+  
   log("Decodificacion de token", configuraciones.jwt.decode)
   configuraciones.validaciones.jwt()
   app.use(
@@ -55,12 +61,9 @@ module.exports.basico = function (schema) {
       path: configuraciones.jwt.decode.unless,
     })
   )
-
   log("Cargando rutas de usuario")
   app.use(configuraciones.ruta_usuario, require("./routes/usuario.routes"))
-
-  generarModeloDeUsuario(schema)
-
+  
   return app
 }
 

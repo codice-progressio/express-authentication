@@ -1,6 +1,7 @@
 const colores = require("colors");
 
 const configuraciones = {
+  mongoose: undefined,
   ruta_usuario: "/usuario",
   cors: {
     origin: "*",
@@ -37,6 +38,7 @@ const configuraciones = {
   },
   usuario: {
     nombre_bd: "Usuario",
+    modelo: undefined,
     schema: {
       nombre: { type: String, min: 4 },
       email: {
