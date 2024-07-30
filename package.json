@@ -24,9 +24,9 @@
     "nodemon": "^2.0.7"
   },
   "dependencies": {
-    "@codice-progressio/easy-permissions": "file:../easy-permissions",
-    "@codice-progressio/express-brute": "file:../express-brute",
-    "@codice-progressio/express-brute-mongoose": "file:../express-brute-mongoose",
+    "@codice-progressio/easy-permissions": "latest",
+    "@codice-progressio/express-brute": "latest",
+    "@codice-progressio/express-brute-mongoose": "latest",
     "bcrypt": "^5.0.1",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
