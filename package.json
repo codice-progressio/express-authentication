@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"No test specified\" && exit 0",
     "start-local": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "release": "npx standard-version && git push --follow-tags && npm publish"
   },
   "keywords": [
     "seguridad",
