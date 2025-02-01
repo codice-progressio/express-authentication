@@ -42,8 +42,8 @@
     "access": "public"
   },
   "engines": {
-    "node": "20.x.x",
-    "npm": "10.x.x"
+    "node": "x.x.x",
+    "npm": "x.x.x"
   },
   "repository": {
     "type": "git",
