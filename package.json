@@ -1,6 +1,6 @@
 {
   "name": "@codice-progressio/express-authentication",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Libreria de autenticacion y utilidades.",
   "main": "index.js",
   "scripts": {
